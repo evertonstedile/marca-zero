@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Marca Zero — Método RAIZ · Mentoria individual</title>
+<meta name="description" content="Do zero à marca. Mentoria individual de e-commerce com método, IA e visão de longo prazo — 6 fases, 6 mundos, 53 sessões. Método RAIZ, por Everton Stedile.">
+<meta property="og:title" content="Marca Zero — Método RAIZ">
+<meta property="og:description" content="Do zero à marca. 6 fases, 6 mundos, 53 sessões — mercado e marca antes de tráfego.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#04090A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20fill='%2304090A'/%3E%3Cpath%20d='M40%206%20L24%2058'%20stroke='%2399AC62'%20stroke-width='5'%20stroke-linecap='round'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   MARCA ZERO — TOKENS (extraídos das logos · documento-mãe §9)
+   ============================================================ */
+:root{
+  --mz-black:       #04090A;
+  --mz-cream:       #EFEFE5;
+  --mz-glow:        #FFFFFF;
+  --mz-green-light: #C8D890;
+  --mz-green:       #99AC62;
+  --mz-green-deep:  #67843C;
+
+  --line:   rgba(239,239,229,.09);
+  --faint:  rgba(239,239,229,.55);
+  --card:   rgba(239,239,229,.028);
+
+  --grad-title: linear-gradient(104deg, #EFEFE5 8%, #C8D890 42%, #99AC62 70%, #67843C 100%);
+  --ease: cubic-bezier(.2,.7,.2,1);
+
+  --font-display: "Sora", "Avenir Next", sans-serif;
+  --font-body: "Inter", "Helvetica Neue", sans-serif;
+
+  --w-accent: var(--mz-green);          /* acento do mundo ativo (chrome) */
+  --chrome-ink: var(--mz-cream);        /* cor do chrome fixo (inverte no mundo claro) */
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0 }
+html{ scroll-behavior:auto; } /* [LEI] o motor JS suaviza; CSS não interfere */
+/* clip, não hidden: overflow-x:hidden no body quebra position:sticky (palco do hero) */
+html, body{ overflow-x:hidden; overflow-x:clip }
+body{
+  background:var(--mz-black);
+  color:var(--mz-cream);
+  font-family:var(--font-body);
+  font-size:16px; line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{ background:var(--mz-green-deep); color:var(--mz-cream) }
+img{ max-width:100%; display:block }
+a{ color:inherit; text-decoration:none }
+
+.wrap{ max-width:1180px; margin-inline:auto; padding-inline:clamp(22px,7vw,80px) }
+
+/* tipografia de mundo */
+.w-eyebrow{
+  font-family:var(--font-display); font-weight:400;
+  font-size:.72rem; letter-spacing:.42em; text-transform:uppercase;
+  color:var(--faint); display:flex; align-items:center; gap:.9em;
+}
+.w-eyebrow .sl{ color:var(--w-accent); font-weight:300; font-size:1.25em; letter-spacing:0 }
+.w-title{
+  font-family:var(--font-display); font-weight:200;
+  font-size:clamp(2.1rem,5.4vw,4.2rem);
+  letter-spacing:.13em; text-transform:uppercase; line-height:1.16;
+  margin-top:26px;
+  background:var(--grad-title);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+.w-lede{
+  margin-top:26px; max-width:58ch;
+  color:rgba(239,239,229,.76); font-size:clamp(1rem,1.4vw,1.12rem);
+}
+.w-head{ margin-bottom:clamp(48px,7vh,84px) }
+.sl{ color:var(--mz-green) }
+
+p strong{ color:var(--mz-cream); font-weight:600 }
+em{ font-style:normal }
+
+/* ============================================================
+   CHROME FIXO — wordmark, contador "/", trilho-raiz, grain
+   ============================================================ */
+#chrome{
+  position:fixed; inset:0 0 auto 0; z-index:50;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:22px clamp(22px,4vw,44px);
+  pointer-events:none;
+  color:var(--mz-cream);
+  mix-blend-mode:difference; /* auto-inverte sobre o mundo claro (Google) */
+}
+.ch-mark{
+  pointer-events:auto;
+  font-family:var(--font-display); font-weight:300;
+  font-size:.82rem; letter-spacing:.34em;
+}
+.ch-mark .sl{ color:inherit; opacity:.65 }
+.ch-counter{
+  font-family:var(--font-display); font-weight:300;
+  font-size:.74rem; letter-spacing:.3em;
+  display:flex; align-items:baseline; gap:.7em;
+}
+.ch-counter .sl{ color:inherit; opacity:.65 }
+.ch-counter em{
+  font-size:.62rem; letter-spacing:.32em; opacity:.55; text-transform:uppercase;
+}
+
+/* trilho-raiz: a raiz cresce conforme o scroll desce */
+#rail{
+  position:fixed; top:0; bottom:0; left:clamp(12px,2.4vw,30px);
+  width:2px; z-index:40; pointer-events:none;
+}
+#rail::before{ /* leito da raiz */
+  content:""; position:absolute; inset:0;
+  background:rgba(239,239,229,.07);
+}
+#rail-fill{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg, var(--mz-green-light), var(--mz-green) 55%, var(--mz-green-deep));
+  transform-origin:top center;
+  will-change:transform;
+}
+html.gsap #rail-fill{ transform:scaleY(0) }
+.rail-node{
+  position:absolute; left:50%; width:7px; height:7px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:var(--mz-black);
+  border:1px solid rgba(239,239,229,.25);
+  transition:background .6s var(--ease), border-color .6s var(--ease), box-shadow .6s var(--ease);
+}
+.rail-node.lit{
+  background:var(--mz-green);
+  border-color:var(--mz-green-light);
+  box-shadow:0 0 10px rgba(153,172,98,.55);
+}
+body[data-world="google"] #rail::before{ background:rgba(4,9,10,.14) }
+
+/* grain anti-slop (feTurbulence) */
+#grain{
+  position:fixed; inset:-2%; z-index:60; pointer-events:none;
+  opacity:.035; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='240'%20height='240'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='240'%20height='240'%20filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   MUNDOS — moldura comum
+   ============================================================ */
+/* clip, não hidden: contém a varredura do "/" sem quebrar os sticky internos */
+.world{ position:relative; padding-block:clamp(110px,15vh,180px); overflow:hidden; overflow:clip }
+
+/* faísca "/" — device de transição entre mundos */
+.world-slash{
+  position:absolute; top:-12vh; left:0; height:130vh; width:2px;
+  background:linear-gradient(180deg, transparent, var(--mz-green-light) 30%, var(--mz-green) 60%, transparent);
+  transform:skewX(-16deg);
+  opacity:0; pointer-events:none;
+  will-change:transform,opacity;
+  display:none;
+}
+html.gsap .world-slash{ display:block }
+
+/* reveals — vanilla CSS + IntersectionObserver (canhão só no crítico) */
+html.motion .rv{ opacity:0; transform:translateY(32px); transition:opacity 1s var(--ease), transform 1s var(--ease) }
+html.motion .rv.on{ opacity:1; transform:none }
+html.motion .rv-group .rv:nth-child(2){ transition-delay:.08s }
+html.motion .rv-group .rv:nth-child(3){ transition-delay:.16s }
+html.motion .rv-group .rv:nth-child(4){ transition-delay:.24s }
+html.motion .rv-group .rv:nth-child(5){ transition-delay:.32s }
+html.motion .rv-group .rv:nth-child(6){ transition-delay:.4s }
+
+/* cards base */
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:30px 28px;
+  transition:transform .45s var(--ease), border-color .45s var(--ease), background .45s var(--ease);
+}
+@media (hover:hover){
+  .card:hover{ transform:translateY(-4px); border-color:color-mix(in srgb, var(--w-accent) 45%, transparent) }
+}
+
+.chip{
+  display:inline-flex; align-items:center; gap:.6em;
+  font-family:var(--font-display); font-weight:300;
+  font-size:.7rem; letter-spacing:.22em; text-transform:uppercase;
+  border:1px solid var(--line); border-radius:100px;
+  padding:.65em 1.3em; color:rgba(239,239,229,.7);
+}
+.chip b{ color:var(--w-accent); font-weight:400 }
+
+.marco{
+  display:flex; gap:18px; align-items:flex-start;
+  border-left:2px solid var(--w-accent);
+  padding:6px 0 6px 22px; max-width:60ch;
+}
+.marco .m-data{
+  font-family:var(--font-display); font-weight:400; white-space:nowrap;
+  font-size:.72rem; letter-spacing:.26em; color:var(--w-accent); padding-top:.35em;
+}
+.marco p{ color:rgba(239,239,229,.78); font-size:.98rem }
+
+.callout{
+  border:1px solid color-mix(in srgb, var(--w-accent) 30%, transparent);
+  background:color-mix(in srgb, var(--w-accent) 5%, transparent);
+  border-radius:16px; padding:34px 32px;
+}
+.callout h3{
+  font-family:var(--font-display); font-weight:300;
+  letter-spacing:.14em; text-transform:uppercase;
+  font-size:clamp(1.15rem,2.2vw,1.5rem); line-height:1.4; color:var(--mz-cream);
+}
+.callout p{ margin-top:14px; color:rgba(239,239,229,.72); font-size:.98rem; max-width:62ch }
+
+/* ============================================================
+   01 · ABERTURA — video-scroll tipográfico (placeholder do vídeo)
+   ============================================================ */
+#abertura{ padding-block:0 }
+.hero-track{ position:relative }
+html.gsap .hero-track{ height:320vh }
+.hero-stage{
+  min-height:100svh;
+  display:grid; place-items:center;
+  position:relative; text-align:center;
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 88%, rgba(103,132,60,.16), transparent 70%),
+    radial-gradient(ellipse 55% 35% at 50% 30%, rgba(200,216,144,.05), transparent 75%),
+    var(--mz-black);
+}
+html.gsap .hero-stage{ position:sticky; top:0; height:100vh; overflow:hidden }
+
+.hero-inner{ padding-inline:24px; position:relative; z-index:2; width:100% }
+.hero-eyebrow{
+  font-family:var(--font-display); font-weight:300;
+  font-size:.72rem; letter-spacing:.5em; text-transform:uppercase;
+  color:rgba(239,239,229,.55);
+}
+
+/* o vídeo é o palco; a logo real é composta POR CIMA */
+.hero-vid{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; z-index:0;
+}
+.hero-shade{ /* vinheta leve para legibilidade da logo e do texto */
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    radial-gradient(ellipse 95% 75% at 50% 50%, transparent 42%, rgba(4,9,10,.5) 100%),
+    linear-gradient(180deg, rgba(4,9,10,.38) 0%, transparent 26% 72%, rgba(4,9,10,.62) 100%);
+}
+.hero-brand{
+  position:relative;
+  width:clamp(300px,56vw,800px);
+  margin:40px auto 0;
+}
+.hero-brand .hero-glow{ /* flare ATRÁS do wordmark — nunca por cima */
+  position:absolute; inset:-46% -18%; z-index:-1; pointer-events:none;
+  background:radial-gradient(ellipse 58% 46% at 50% 52%, rgba(200,216,144,.16), transparent 72%);
+}
+.hero-logo{
+  width:100%;
+  mix-blend-mode:screen; /* fundo preto do PNG desaparece sobre o vídeo */
+  will-change:transform,opacity;
+}
+.hero-fallback{
+  display:none;
+  font-family:var(--font-display); font-weight:200;
+  font-size:clamp(2.3rem,8vw,5.8rem);
+  letter-spacing:clamp(.14em,.8vw,.24em); line-height:1;
+  text-align:center; color:var(--mz-cream); white-space:nowrap;
+}
+.hero-fallback .sl{
+  display:inline-block; transform:skewX(-12deg);
+  color:var(--mz-green); margin-inline:.22em;
+  text-shadow:0 0 24px rgba(200,216,144,.5);
+}
+.hero-fallback .lz{
+  background:linear-gradient(115deg,#C8D890 5%, #99AC62 55%, #67843C 100%);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+.hero-brand.missing .hero-logo{ display:none }
+.hero-brand.missing .hero-fallback{ display:block }
+.hero-sub{
+  margin:34px auto 0; max-width:46ch;
+  color:rgba(239,239,229,.72);
+  font-size:clamp(1rem,1.6vw,1.18rem);
+}
+.hero-chips{
+  margin-top:34px;
+  display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+}
+.hero-hint{
+  position:absolute; bottom:34px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+  font-family:var(--font-display); font-size:.62rem;
+  letter-spacing:.42em; text-transform:uppercase;
+  color:rgba(239,239,229,.45);
+}
+.hero-hint::after{
+  content:""; width:1px; height:46px;
+  background:linear-gradient(180deg, var(--mz-green), transparent);
+}
+html.motion .hero-hint::after{ animation:hint 2.4s var(--ease) infinite }
+@keyframes hint{ 0%{transform:scaleY(0);transform-origin:top} 45%{transform:scaleY(1);transform-origin:top} 46%{transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
+
+/* ============================================================
+   02 · MERCADO
+   ============================================================ */
+#mercado{
+  background:linear-gradient(180deg, var(--mz-black) 0%, #060D0E 30%, #060D0E 70%, var(--mz-black) 100%);
+}
+.arc{ position:relative; padding-left:clamp(34px,5vw,60px); max-width:760px }
+.arc::before{ /* leito da linha do tempo */
+  content:""; position:absolute; left:8px; top:6px; bottom:6px; width:1px;
+  background:rgba(239,239,229,.1);
+}
+.arc-fill{
+  position:absolute; left:8px; top:6px; bottom:6px; width:1px;
+  background:linear-gradient(180deg, var(--mz-green-light), var(--mz-green-deep));
+  transform-origin:top center; will-change:transform;
+}
+html.gsap .arc-fill{ transform:scaleY(0) }
+.arc-item{ position:relative; padding-bottom:46px }
+.arc-item:last-child{ padding-bottom:0 }
+.arc-item::before{
+  content:""; position:absolute; left:calc(8px - clamp(34px,5vw,60px)); top:.5em;
+  width:9px; height:9px; border-radius:50%;
+  transform:translateX(-4px);
+  background:var(--mz-green-deep); border:1px solid var(--mz-green);
+}
+.arc-year{
+  font-family:var(--font-display); font-weight:300;
+  letter-spacing:.3em; font-size:.95rem; color:var(--mz-green-light);
+}
+.arc-item p{ margin-top:10px; color:rgba(239,239,229,.74); font-size:.99rem; max-width:58ch }
+
+.numgrid{
+  margin-top:clamp(60px,9vh,100px);
+  display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+}
+.num{ padding:30px 26px }
+.num .n-val{
+  font-family:var(--font-display); font-weight:200;
+  font-size:clamp(1.9rem,3.6vw,2.9rem); letter-spacing:.04em;
+  background:var(--grad-title);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+  white-space:nowrap;
+}
+.num p{ margin-top:12px; font-size:.85rem; color:rgba(239,239,229,.62); line-height:1.55 }
+
+.forcas{
+  margin-top:clamp(60px,9vh,100px);
+  display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+}
+.forca .f-n{
+  font-family:var(--font-display); font-weight:300; font-size:.72rem;
+  letter-spacing:.3em; color:var(--mz-green);
+}
+.forca h3{
+  margin-top:14px; font-family:var(--font-display); font-weight:400;
+  font-size:1.02rem; letter-spacing:.06em; line-height:1.45; color:var(--mz-cream);
+}
+.forca p{ margin-top:12px; font-size:.88rem; color:rgba(239,239,229,.6) }
+.forca .f-met{
+  margin-top:16px; padding-top:16px; border-top:1px solid var(--line);
+  font-size:.84rem; color:var(--mz-green-light);
+}
+.forca .f-met::before{ content:"/ no método — "; color:rgba(239,239,229,.45) }
+
+.tese{
+  margin-top:clamp(70px,10vh,110px);
+  font-family:var(--font-display); font-weight:200;
+  font-size:clamp(1.6rem,3.8vw,3rem);
+  letter-spacing:.1em; text-transform:uppercase; line-height:1.35;
+  max-width:22ch;
+  background:var(--grad-title);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+
+/* ============================================================
+   03 · CLAUDE / IA
+   ============================================================ */
+#ia{
+  --w-accent:#D97757;
+  background:linear-gradient(180deg, var(--mz-black) 0%, #0C0907 26%, #0C0907 74%, var(--mz-black) 100%);
+}
+#ia .w-title{ background:linear-gradient(104deg,#EFEFE5 10%, #E8C0AE 45%, #D97757 80%); -webkit-background-clip:text; background-clip:text }
+.equipe{
+  display:grid; grid-template-columns:repeat(6,1fr); gap:16px;
+}
+.equipe .card:nth-child(1){ grid-column:span 2 }
+.equipe .card:nth-child(2){ grid-column:span 2 }
+.equipe .card:nth-child(3){ grid-column:span 2 }
+.equipe .card:nth-child(4){ grid-column:span 3 }
+.equipe .card:nth-child(5){ grid-column:span 3 }
+.equipe h3{
+  font-family:var(--font-display); font-weight:400; font-size:.95rem;
+  letter-spacing:.16em; text-transform:uppercase; color:#E8C0AE;
+}
+.equipe p{ margin-top:12px; font-size:.9rem; color:rgba(239,239,229,.62) }
+
+.prompt-line{
+  margin-top:48px;
+  font-family:"SF Mono", ui-monospace, Menlo, monospace;
+  font-size:.88rem; color:rgba(239,239,229,.66);
+  border:1px solid var(--line); border-radius:12px;
+  padding:20px 24px; max-width:680px;
+  background:rgba(4,9,10,.55);
+}
+.prompt-line .pl-mark{ color:#D97757 }
+.caret{
+  display:inline-block; width:8px; height:1.05em;
+  background:#D97757; vertical-align:text-bottom; margin-left:2px;
+}
+html.motion .caret{ animation:caret 1.1s steps(1) infinite }
+@keyframes caret{ 50%{ opacity:0 } }
+
+#ia .callout{ margin-top:48px }
+#ia .chips-row{ margin-top:40px; display:flex; gap:12px; flex-wrap:wrap }
+
+/* ============================================================
+   04 · FORNECEDOR / SOURCING
+   ============================================================ */
+#fornecedor{
+  --w-accent:#E0A43C;
+  background:linear-gradient(180deg, var(--mz-black) 0%, #0B0A06 26%, #0B0A06 74%, var(--mz-black) 100%);
+}
+#fornecedor .w-title{ background:linear-gradient(104deg,#EFEFE5 10%, #EBCB8F 48%, #E0A43C 85%); -webkit-background-clip:text; background-clip:text }
+.tradeoff{ border:1px solid var(--line); border-radius:16px; overflow:hidden }
+.to-row{
+  display:grid; grid-template-columns:1.25fr 1fr 1fr;
+  border-top:1px solid var(--line);
+}
+.to-row:first-child{ border-top:none; background:rgba(239,239,229,.03) }
+.to-row > div{ padding:18px 22px; font-size:.9rem }
+.to-row > div:first-child{ color:rgba(239,239,229,.55) }
+.to-row.head > div{
+  font-family:var(--font-display); font-weight:400; font-size:.72rem;
+  letter-spacing:.26em; text-transform:uppercase; color:var(--mz-cream);
+}
+.to-ok{ color:var(--mz-green-light) }
+.to-ok::after{ content:" ✓"; color:var(--mz-green); font-weight:600 }
+.to-mute{ color:rgba(239,239,229,.5) }
+
+.raiox{ margin-top:48px; display:grid; grid-template-columns:1fr 1fr; gap:16px }
+.raiox h3{
+  font-family:var(--font-display); font-weight:400; font-size:.8rem;
+  letter-spacing:.24em; text-transform:uppercase;
+}
+.raiox .rx-int h3{ color:#E0A43C }
+.raiox .rx-nac h3{ color:var(--mz-green-light) }
+.raiox ul{ margin-top:18px; list-style:none }
+.raiox li{
+  position:relative; padding:8px 0 8px 22px;
+  font-size:.88rem; color:rgba(239,239,229,.66);
+}
+.raiox li::before{
+  content:"/"; position:absolute; left:0; top:8px;
+  color:var(--w-accent); opacity:.8;
+}
+.rx-nac li::before{ color:var(--mz-green) }
+#fornecedor .marco{ margin-top:48px }
+#fornecedor .nota{ margin-top:26px; font-size:.88rem; color:rgba(239,239,229,.5); max-width:60ch }
+
+/* ============================================================
+   05 · IDENTIDADE / CANVA
+   ============================================================ */
+#identidade{
+  --w-accent:#8B5CF6;
+  background:linear-gradient(180deg, var(--mz-black) 0%, #0A0710 26%, #070C10 74%, var(--mz-black) 100%);
+}
+#identidade .w-title{ background:linear-gradient(104deg,#EFEFE5 8%, #C3B2F2 45%, #5FD3D8 90%); -webkit-background-clip:text; background-clip:text }
+.logo-show{ display:grid; grid-template-columns:1fr 1fr; gap:16px }
+.logo-frame{
+  border:1px solid var(--line); border-radius:16px; overflow:hidden;
+  background:#04090A; position:relative;
+}
+.logo-frame img{ width:100%; aspect-ratio:3/2; object-fit:cover }
+.logo-fallback{
+  display:none; aspect-ratio:3/2;
+  align-items:center; justify-content:center;
+  font-family:var(--font-display); font-weight:200;
+  letter-spacing:.24em; font-size:clamp(1.2rem,2.6vw,2rem);
+  color:var(--mz-cream);
+}
+.logo-fallback .sl{ color:var(--mz-green); margin-inline:.35em }
+.logo-frame.missing img{ display:none }
+.logo-frame.missing .logo-fallback{ display:flex }
+.logo-frame figcaption{
+  padding:16px 22px; border-top:1px solid var(--line);
+  font-size:.8rem; color:rgba(239,239,229,.55); letter-spacing:.04em;
+}
+.logo-frame figcaption b{ color:var(--mz-cream); font-weight:500 }
+#identidade .nasceram{ margin-top:20px; font-size:.9rem; color:var(--mz-green-light) }
+
+.idchecks{ margin-top:54px; display:grid; grid-template-columns:repeat(4,1fr); gap:16px }
+.idchecks .card{ padding:24px 22px }
+.idchecks .ck{
+  font-family:var(--font-display); color:var(--mz-green-light);
+  font-size:.85rem; letter-spacing:.1em;
+}
+.idchecks .ck::before{ content:"✓ "; color:var(--mz-green) }
+.idchecks p{ margin-top:10px; font-size:.82rem; color:rgba(239,239,229,.55) }
+#identidade .marco{ margin-top:52px }
+
+/* ============================================================
+   06 · SHOPIFY
+   ============================================================ */
+#shopify{
+  --w-accent:#95BF47;
+  background:linear-gradient(180deg, var(--mz-black) 0%, #080D05 26%, #080D05 74%, var(--mz-black) 100%);
+}
+#shopify .w-title{ background:linear-gradient(104deg,#EFEFE5 10%, #C9E08F 50%, #95BF47 88%); -webkit-background-clip:text; background-clip:text }
+.shop-grid{ display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(28px,4vw,56px); align-items:center }
+
+.browser{
+  border:1px solid var(--line); border-radius:16px; overflow:hidden;
+  background:#070C08;
+  box-shadow:0 30px 80px rgba(0,0,0,.5);
+  will-change:transform;
+}
+.browser-bar{
+  display:flex; align-items:center; gap:8px;
+  padding:12px 16px; border-bottom:1px solid var(--line);
+  background:rgba(239,239,229,.03);
+}
+.browser-bar i{ width:9px; height:9px; border-radius:50%; background:rgba(239,239,229,.16) }
+.browser-bar span{
+  margin-left:12px; font-size:.68rem; letter-spacing:.12em;
+  color:rgba(239,239,229,.4); font-family:var(--font-display);
+}
+.browser-body{ padding:22px }
+.sk{ border-radius:8px; background:rgba(239,239,229,.06) }
+.sk-nav{ height:12px; width:38%; margin-bottom:16px }
+.sk-hero{
+  height:120px; margin-bottom:16px; position:relative; overflow:hidden;
+  background:linear-gradient(120deg, rgba(149,191,71,.22), rgba(149,191,71,.05));
+}
+.sk-hero::after{
+  content:"SUA MARCA AQUI"; position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-weight:300; font-size:.72rem;
+  letter-spacing:.4em; color:rgba(239,239,229,.65);
+}
+.sk-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px }
+.sk-card{ height:96px; position:relative }
+.sk-card::after{
+  content:""; position:absolute; left:10px; right:30%; bottom:10px; height:7px;
+  border-radius:4px; background:rgba(239,239,229,.12);
+}
+.sk-cta{ height:34px; width:46%; margin-top:16px; background:rgba(149,191,71,.35) }
+
+.shop-list{ list-style:none }
+.shop-list li{
+  display:flex; gap:18px; padding:20px 0;
+  border-bottom:1px solid var(--line);
+}
+.shop-list li:last-child{ border-bottom:none }
+.shop-list .s-n{
+  font-family:var(--font-display); font-weight:300; font-size:.72rem;
+  letter-spacing:.2em; color:var(--w-accent); white-space:nowrap; padding-top:.3em;
+}
+.shop-list h3{
+  font-family:var(--font-display); font-weight:400; font-size:.95rem;
+  letter-spacing:.08em; color:var(--mz-cream);
+}
+.shop-list p{ margin-top:6px; font-size:.86rem; color:rgba(239,239,229,.58) }
+#shopify .marco{ margin-top:54px }
+
+/* ============================================================
+   07 · CHECKOUT / YEVER
+   ============================================================ */
+#checkout{
+  --w-accent:#32BCAD;
+  background:linear-gradient(180deg, var(--mz-black) 0%, #06100F 26%, #06100F 74%, var(--mz-black) 100%);
+}
+#checkout .w-title{ background:linear-gradient(104deg,#EFEFE5 10%, #9FE3DB 52%, #32BCAD 90%); -webkit-background-clip:text; background-clip:text }
+.flow{
+  display:flex; gap:0; align-items:stretch;
+  overflow-x:auto; padding-bottom:8px;
+  scrollbar-width:none;
+}
+.flow::-webkit-scrollbar{ display:none }
+.flow-step{ display:flex; align-items:center; flex:1; min-width:150px }
+.fs-box{
+  flex:1; border:1px solid var(--line); border-radius:14px;
+  padding:20px 16px; text-align:center;
+  background:var(--card);
+  transition:border-color .45s var(--ease);
+}
+@media (hover:hover){ .fs-box:hover{ border-color:rgba(50,188,173,.5) } }
+.fs-box h4{
+  font-family:var(--font-display); font-weight:400; font-size:.74rem;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--mz-cream);
+}
+.fs-box p{ margin-top:8px; font-size:.76rem; color:rgba(239,239,229,.52); line-height:1.5 }
+.flow-step::after{
+  content:"/"; padding-inline:10px;
+  color:var(--w-accent); font-family:var(--font-display); font-weight:200;
+  font-size:1.2rem; opacity:.6;
+}
+.flow-step:last-child::after{ content:none }
+
+.decisao{ margin-top:56px; display:grid; grid-template-columns:1fr 1fr; gap:16px }
+.decisao .card h3{
+  font-family:var(--font-display); font-weight:400; font-size:1rem;
+  letter-spacing:.16em; text-transform:uppercase;
+}
+.decisao .card:first-child h3{ color:#B4F461 }
+.decisao .card:last-child h3{ color:#5FD3D8 }
+.decisao p{ margin-top:12px; font-size:.88rem; color:rgba(239,239,229,.6) }
+#checkout .marco{ margin-top:40px }
+
+/* ============================================================
+   08 · GOOGLE — o único mundo claro
+   ============================================================ */
+#google{
+  background:linear-gradient(180deg, var(--mz-black) 0%, #F4F5F1 16%, #F4F5F1 84%, var(--mz-black) 100%);
+  color:#1B1F1A;
+}
+#google .w-eyebrow{ color:rgba(27,31,26,.5) }
+#google .w-eyebrow .sl{ color:#4285F4 }
+#google .w-title{
+  background:linear-gradient(104deg, #1B1F1A 20%, #4285F4 60%, #34A853 95%);
+  -webkit-background-clip:text; background-clip:text;
+}
+#google .w-lede{ color:rgba(27,31,26,.66) }
+.gsearch{
+  max-width:640px;
+  background:#FFFFFF;
+  border:1px solid rgba(27,31,26,.12);
+  border-radius:100px;
+  padding:20px 30px;
+  display:flex; align-items:center; gap:16px;
+  box-shadow:0 18px 50px rgba(27,31,26,.1);
+  position:relative;
+}
+.gsearch::after{
+  content:""; position:absolute; left:30px; right:30px; bottom:-14px; height:3px; border-radius:3px;
+  background:linear-gradient(90deg, #4285F4 0 25%, #EA4335 0 50%, #FBBC05 0 75%, #34A853 0 100%);
+  opacity:.85;
+}
+.gsearch svg{ flex:none }
+.gsearch .gq{
+  font-size:1.05rem; color:#1B1F1A; font-weight:500;
+  white-space:nowrap; overflow:hidden;
+}
+.gsearch .gcaret{
+  display:inline-block; width:2px; height:1.2em; background:#4285F4;
+  vertical-align:text-bottom; margin-left:1px;
+}
+html.motion .gsearch .gcaret{ animation:caret 1.1s steps(1) infinite }
+.gpoints{ margin-top:64px; display:grid; grid-template-columns:repeat(3,1fr); gap:16px }
+.gpoints .card{ background:#FFFFFF; border-color:rgba(27,31,26,.1) }
+@media (hover:hover){ .gpoints .card:hover{ border-color:#4285F4 } }
+.gpoints h3{
+  font-family:var(--font-display); font-weight:400; font-size:.88rem;
+  letter-spacing:.14em; text-transform:uppercase; color:#1B1F1A;
+}
+.gpoints p{ margin-top:10px; font-size:.86rem; color:rgba(27,31,26,.6) }
+.gpoints .g-s{ font-size:.72rem; letter-spacing:.2em; color:#4285F4; font-family:var(--font-display) }
+
+/* ============================================================
+   09 · TIKTOK SHOP
+   ============================================================ */
+#tiktok{
+  --w-accent:#25F4EE;
+  background:linear-gradient(180deg, var(--mz-black) 0%, #010101 18%, #010101 82%, var(--mz-black) 100%);
+}
+#tiktok .w-title{
+  background:none; -webkit-text-fill-color:var(--mz-cream); color:var(--mz-cream);
+  text-shadow:-3px 0 rgba(37,244,238,.55), 3px 0 rgba(254,44,85,.55);
+}
+.tt-grid{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,4vw,56px); align-items:start }
+.tt-stats{ list-style:none }
+.tt-stats li{ padding:22px 0; border-bottom:1px solid rgba(239,239,229,.08) }
+.tt-stats li:last-child{ border-bottom:none }
+.tt-stats .t-v{
+  font-family:var(--font-display); font-weight:200; font-size:clamp(1.7rem,3vw,2.4rem);
+  color:var(--mz-cream);
+}
+.tt-stats .t-v b{ font-weight:200; color:#25F4EE }
+.tt-stats p{ margin-top:6px; font-size:.86rem; color:rgba(239,239,229,.55) }
+.phones{ display:flex; gap:14px; justify-content:flex-end }
+.phone{
+  flex:1; max-width:170px; aspect-ratio:9/17;
+  border:1px solid rgba(239,239,229,.14); border-radius:22px;
+  position:relative; overflow:hidden;
+  background:linear-gradient(160deg, rgba(37,244,238,.12), rgba(1,1,1,.1) 45%, rgba(254,44,85,.14));
+  will-change:transform;
+}
+.phone::before{
+  content:""; position:absolute; top:10px; left:50%; transform:translateX(-50%);
+  width:34%; height:4px; border-radius:4px; background:rgba(239,239,229,.18);
+}
+.phone span{
+  position:absolute; left:14px; right:14px; bottom:16px;
+  font-family:var(--font-display); font-weight:300; font-size:.6rem;
+  letter-spacing:.26em; text-transform:uppercase; color:rgba(239,239,229,.75);
+  line-height:1.8;
+}
+.phone:nth-child(2){ transform:translateY(22px) }
+.phone:nth-child(3){ transform:translateY(44px) }
+#tiktok .callout{ margin-top:60px; border-color:rgba(254,44,85,.3); background:rgba(254,44,85,.04) }
+#tiktok .marco{ margin-top:44px; border-color:#FE2C55 }
+#tiktok .marco .m-data{ color:#FE2C55 }
+
+/* ============================================================
+   10 · META
+   ============================================================ */
+#meta{
+  --w-accent:#0866FF;
+  background:linear-gradient(180deg, var(--mz-black) 0%, #04070F 24%, #04070F 76%, var(--mz-black) 100%);
+}
+#meta .w-title{ background:linear-gradient(104deg,#EFEFE5 8%, #7AB1FF 50%, #0866FF 92%); -webkit-background-clip:text; background-clip:text }
+.meta-chips{ display:flex; gap:12px; flex-wrap:wrap }
+.meta-chips .chip b{ color:#7AB1FF }
+.cenarios{ margin-top:56px; display:grid; grid-template-columns:repeat(3,1fr); gap:16px }
+.cenario{ position:relative; overflow:hidden }
+.cenario h3{
+  font-family:var(--font-display); font-weight:300; font-size:.78rem;
+  letter-spacing:.3em; text-transform:uppercase; color:#7AB1FF;
+}
+.cenario .c-fat{
+  margin-top:18px; font-family:var(--font-display); font-weight:200;
+  font-size:clamp(1.6rem,2.6vw,2.2rem); letter-spacing:.02em; color:var(--mz-cream);
+  white-space:nowrap;
+}
+.cenario .c-fat small{
+  display:block; font-size:.68rem; letter-spacing:.22em;
+  color:rgba(239,239,229,.45); margin-top:6px; font-weight:300;
+}
+.cenario ul{ list-style:none; margin-top:20px; border-top:1px solid var(--line) }
+.cenario li{
+  display:flex; justify-content:space-between; gap:12px;
+  padding:10px 0; font-size:.82rem;
+  border-bottom:1px solid var(--line);
+}
+.cenario li span:first-child{ color:rgba(239,239,229,.5) }
+.cenario li span:last-child{ color:var(--mz-cream); text-align:right }
+.cenario .c-verdade{ margin-top:16px; font-size:.8rem; color:rgba(239,239,229,.55) }
+.cenario .c-verdade b{ color:#7AB1FF; font-weight:500 }
+#meta .disclaimer{
+  margin-top:40px; border-left:2px solid #0866FF;
+  padding:8px 0 8px 22px; max-width:66ch;
+  font-size:.9rem; color:rgba(239,239,229,.6);
+}
+
+/* ============================================================
+   11 · JORNADA RAIZ
+   ============================================================ */
+#jornada{
+  background:
+    radial-gradient(ellipse 60% 30% at 50% 100%, rgba(103,132,60,.14), transparent 70%),
+    var(--mz-black);
+}
+.jr-grid{ display:grid; grid-template-columns:300px 1fr; gap:clamp(32px,5vw,72px) }
+.jr-rail{ position:relative }
+.jr-sticky{ position:sticky; top:12vh }
+.jr-words{
+  position:relative; height:1.3em; margin-top:26px;
+  font-family:var(--font-display); font-weight:200;
+  font-size:clamp(1.8rem,3vw,2.6rem); letter-spacing:.18em;
+}
+.jr-words span{
+  position:absolute; inset:0; opacity:0;
+  transition:opacity .6s var(--ease);
+  background:var(--grad-title);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+.jr-words span.is-active{ opacity:1 }
+.jr-svg{ display:block; margin-top:18px; width:120px; height:auto }
+.jr-svg .taproot{
+  stroke:url(#rootGrad); stroke-width:2; fill:none; stroke-linecap:round;
+}
+html.gsap .jr-svg .taproot{ stroke-dasharray:1; stroke-dashoffset:1 }
+.jr-node circle{
+  fill:#04090A; stroke:rgba(239,239,229,.3); stroke-width:1;
+  transition:fill .6s var(--ease), stroke .6s var(--ease);
+}
+.jr-node path{
+  stroke:var(--mz-green-deep); stroke-width:1.4; fill:none; stroke-linecap:round;
+  stroke-dasharray:70; stroke-dashoffset:70;
+  transition:stroke-dashoffset 1s var(--ease);
+}
+html:not(.motion) .jr-node path{ stroke-dashoffset:0 }
+.jr-node.is-active circle{ fill:var(--mz-green); stroke:var(--mz-green-light) }
+.jr-node.is-active path{ stroke-dashoffset:0 }
+
+.jr-phase{ margin-bottom:18px }
+.jr-phase .ph-top{
+  display:flex; justify-content:space-between; align-items:baseline; gap:14px; flex-wrap:wrap;
+}
+.jr-phase h3{
+  font-family:var(--font-display); font-weight:300;
+  font-size:clamp(1.1rem,2vw,1.4rem); letter-spacing:.2em;
+  color:var(--mz-cream);
+}
+.jr-phase h3 i{
+  font-style:normal; font-size:.7rem; letter-spacing:.3em;
+  color:var(--mz-green); margin-right:14px;
+}
+.jr-phase .ph-meta{
+  font-family:var(--font-display); font-size:.66rem; font-weight:300;
+  letter-spacing:.24em; color:rgba(239,239,229,.45); text-transform:uppercase;
+}
+.jr-phase p{ margin-top:14px; font-size:.9rem; color:rgba(239,239,229,.62); max-width:58ch }
+.jr-phase .ph-meta-line{ margin-top:14px; font-size:.8rem; color:var(--mz-green-light) }
+.jr-phase .ph-meta-line::before{ content:"meta — "; color:rgba(239,239,229,.4) }
+.jr-phase .ph-anda{
+  margin-top:16px; display:inline-block;
+  font-size:.68rem; letter-spacing:.22em; text-transform:uppercase;
+  font-family:var(--font-display);
+  color:rgba(239,239,229,.5);
+  border:1px solid var(--line); border-radius:100px; padding:.5em 1.1em;
+}
+
+.andaime{ margin-top:clamp(70px,9vh,100px) }
+.andaime h3, .marcos h3{
+  font-family:var(--font-display); font-weight:300; font-size:.78rem;
+  letter-spacing:.34em; text-transform:uppercase; color:rgba(239,239,229,.5);
+  margin-bottom:28px;
+}
+.anda-bar{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px }
+.anda-step{ padding:18px 18px 22px; border:1px solid var(--line); border-radius:12px }
+.anda-step .a-bar{
+  height:5px; border-radius:3px; background:rgba(239,239,229,.1);
+  position:relative; overflow:hidden; margin-bottom:14px;
+}
+.anda-step .a-bar::after{
+  content:""; position:absolute; inset:0; transform-origin:left;
+  background:var(--mz-green);
+}
+.anda-step:nth-child(1) .a-bar::after{ transform:scaleX(.95) }
+.anda-step:nth-child(2) .a-bar::after{ transform:scaleX(.65) }
+.anda-step:nth-child(3) .a-bar::after{ transform:scaleX(.35) }
+.anda-step:nth-child(4) .a-bar::after{ transform:scaleX(.12) }
+.anda-step h4{
+  font-family:var(--font-display); font-weight:400; font-size:.74rem;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--mz-cream);
+}
+.anda-step p{ margin-top:6px; font-size:.76rem; color:rgba(239,239,229,.45) }
+
+.marcos{ margin-top:clamp(70px,9vh,100px) }
+.marcos-list{ list-style:none; border-top:1px solid var(--line) }
+.marcos-list li{
+  display:grid; grid-template-columns:130px 1fr auto; gap:18px; align-items:baseline;
+  padding:18px 0; border-bottom:1px solid var(--line);
+}
+.marcos-list .mc-d{
+  font-family:var(--font-display); font-weight:300; font-size:.78rem;
+  letter-spacing:.24em; color:var(--mz-green-light);
+}
+.marcos-list .mc-t{ font-size:.92rem; color:rgba(239,239,229,.78) }
+.marcos-list .mc-s{
+  font-family:var(--font-display); font-size:.62rem; letter-spacing:.24em;
+  color:rgba(239,239,229,.38); text-transform:uppercase;
+}
+.marcos-list li.bf .mc-d{ color:#C8D890 }
+.marcos-list li.bf .mc-t{ color:var(--mz-cream) }
+.marcos-list li.bf .mc-t b{
+  font-weight:600;
+  background:var(--grad-title);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+.jr-sucesso{
+  margin-top:clamp(70px,9vh,100px);
+  font-family:var(--font-display); font-weight:200;
+  font-size:clamp(1.4rem,3vw,2.3rem); letter-spacing:.1em;
+  text-transform:uppercase; line-height:1.45; max-width:30ch;
+  background:var(--grad-title);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+
+/* ============================================================
+   12 · CTA / ONBOARDING + rodapé com a raiz aterrando
+   ============================================================ */
+#inicio{ padding-bottom:0; text-align:left }
+.cta-start{
+  margin-top:clamp(60px,8vh,90px);
+  font-family:var(--font-display); font-weight:200;
+  font-size:clamp(2.2rem,7vw,5.4rem);
+  letter-spacing:.16em; text-transform:uppercase; line-height:1.2;
+}
+.cta-start .sl{ font-weight:200 }
+.cta-start b{
+  font-weight:200;
+  background:var(--grad-title);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+.cta-chips{ margin-top:44px; display:flex; gap:12px; flex-wrap:wrap }
+.cta-check{ margin-top:56px; max-width:560px }
+.cta-check h3{
+  font-family:var(--font-display); font-weight:300; font-size:.78rem;
+  letter-spacing:.34em; text-transform:uppercase; color:rgba(239,239,229,.5);
+}
+.cta-check ul{ list-style:none; margin-top:18px; border-top:1px solid var(--line) }
+.cta-check li{
+  display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--line);
+  font-size:.92rem; color:rgba(239,239,229,.72);
+}
+.cta-check li::before{ content:"/"; color:var(--mz-green) }
+
+.cta-lockup{
+  margin-top:clamp(90px,14vh,150px);
+  text-align:center;
+  font-family:var(--font-display); font-weight:200;
+  font-size:clamp(1.6rem,4.6vw,3.4rem); letter-spacing:.3em;
+  color:var(--mz-cream);
+}
+.cta-lockup .sl{
+  display:inline-block; transform:skewX(-12deg);
+  color:var(--mz-green); margin-inline:.25em;
+}
+.cta-lockup .lz{
+  background:linear-gradient(115deg,#C8D890 5%, #99AC62 55%, #67843C 100%);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+.cta-tag{
+  margin-top:20px; text-align:center;
+  font-family:var(--font-display); font-weight:300; font-size:.66rem;
+  letter-spacing:.5em; text-transform:uppercase; color:rgba(239,239,229,.42);
+}
+footer{
+  margin-top:clamp(70px,9vh,110px); position:relative;
+  padding:0 0 34px;
+}
+.f-roots{ display:block; width:min(560px,80%); margin-inline:auto; opacity:.55 }
+.f-roots path{ stroke:var(--mz-green-deep); fill:none; stroke-width:1.3; stroke-linecap:round }
+.f-line{
+  margin-top:30px; text-align:center;
+  font-size:.74rem; color:rgba(239,239,229,.38); letter-spacing:.06em;
+}
+
+/* ============================================================
+   RESPONSIVO
+   ============================================================ */
+@media (max-width:1020px){
+  .numgrid{ grid-template-columns:repeat(2,1fr) }
+  .forcas{ grid-template-columns:repeat(2,1fr) }
+  .equipe .card{ grid-column:span 3 !important }
+  .idchecks{ grid-template-columns:repeat(2,1fr) }
+  .cenarios{ grid-template-columns:1fr; max-width:560px }
+  .gpoints{ grid-template-columns:1fr; max-width:560px }
+  .jr-grid{ grid-template-columns:1fr }
+  .jr-rail{ display:none }
+  .shop-grid{ grid-template-columns:1fr }
+  .tt-grid{ grid-template-columns:1fr }
+  .phones{ justify-content:flex-start }
+}
+@media (max-width:680px){
+  body{ font-size:15px }
+  /* no 9:16 o feixe cruza o centro: proteção escura atrás da marca p/ legibilidade total */
+  .hero-shade{
+    background:
+      radial-gradient(ellipse 130% 46% at 50% 52%, rgba(4,9,10,.58) 0%, transparent 72%),
+      linear-gradient(180deg, rgba(4,9,10,.45) 0%, transparent 26% 72%, rgba(4,9,10,.66) 100%);
+  }
+  .numgrid{ grid-template-columns:1fr 1fr; gap:10px }
+  .num{ padding:20px 16px }
+  .forcas{ grid-template-columns:1fr }
+  .logo-show{ grid-template-columns:1fr }
+  .raiox{ grid-template-columns:1fr }
+  .decisao{ grid-template-columns:1fr }
+  .idchecks{ grid-template-columns:1fr }
+  .anda-bar{ grid-template-columns:1fr 1fr }
+  .marcos-list li{ grid-template-columns:1fr; gap:4px }
+  .equipe .card{ grid-column:span 6 !important }
+  .to-row > div{ padding:12px 12px; font-size:.78rem }
+  .ch-counter em{ display:none }
+}
+
+/* ============================================================
+   ACESSIBILIDADE — prefers-reduced-motion [LEI: neutraliza tudo]
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+  .rv{ opacity:1 !important; transform:none !important }
+  .world-slash{ display:none !important }
+  #rail-fill{ transform:none !important }
+  .arc-fill{ transform:none !important }
+  .jr-svg .taproot{ stroke-dasharray:none !important; stroke-dashoffset:0 !important }
+  .jr-node path{ stroke-dashoffset:0 !important }
+  .jr-words span{ opacity:0 }
+  .jr-words span:first-child{ opacity:1 }
+}
+</style>
+</head>
+<body data-world="abertura">
+
+<!-- CHROME FIXO -->
+<header id="chrome">
+  <a class="ch-mark" href="#abertura">MARCA<span class="sl">/</span>ZERO</a>
+  <div class="ch-counter">
+    <span id="chIdx">01</span><span class="sl">/</span><span>12</span>
+    <em id="chName">Abertura</em>
+  </div>
+</header>
+<div id="rail" aria-hidden="true">
+  <div id="rail-fill"></div>
+</div>
+<div id="grain" aria-hidden="true"></div>
+
+<main>
+
+<!-- ============================================================
+     MUNDO 01 · ABERTURA — MARCA ZERO
+     Video-scroll real (hero-bg.mp4, -g 5) + logo composta por cima.
+     O "/" da logo cai sobre o feixe diagonal de luz/raízes do vídeo;
+     o fluxo de raízes escoa para a esquerda e emenda no trilho-raiz.
+     ============================================================ -->
+<section class="world hero" id="abertura" data-world="abertura" data-index="01" data-name="Abertura">
+  <div class="hero-track" id="heroTrack">
+    <div class="hero-stage">
+      <video id="heroVid" class="hero-vid" muted playsinline preload="auto"
+             poster="assets/video/hero-poster.webp" aria-hidden="true"></video>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <p class="hero-eyebrow">Mentoria individual · Método RAIZ</p>
+        <h1 class="hero-brand" aria-label="Marca Zero">
+          <span class="hero-glow" aria-hidden="true"></span>
+          <!-- PLACEHOLDER: assets/logo-marca-zero.png — fallback tipográfico assume se o PNG faltar -->
+          <img class="hero-logo" src="assets/logo-marca-zero.png" alt="Marca Zero" decoding="async"
+               onerror="this.closest('.hero-brand').classList.add('missing')">
+          <span class="hero-fallback" aria-hidden="true">MARCA<span class="sl">/</span><span class="lz">ZERO</span></span>
+        </h1>
+        <p class="hero-sub">Do zero à marca. Não é abrir uma loja — é construir uma marca digital com método, IA e visão de longo prazo.</p>
+        <div class="hero-chips">
+          <span class="chip"><b>53</b> sessões</span>
+          <span class="chip"><b>6</b> fases <span class="sl">/</span> <b>6</b> mundos</span>
+          <span class="chip">09 jun → 08 dez 2026</span>
+        </div>
+      </div>
+      <div class="hero-hint">role — a raiz começa aqui</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MUNDO 02 · MERCADO
+     ============================================================ -->
+<section class="world" id="mercado" data-world="mercado" data-index="02" data-name="Mercado">
+  <div class="world-slash" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="w-head rv">
+      <p class="w-eyebrow"><span class="sl">/</span> Mundo 02 · Terreno — Mercado</p>
+      <h2 class="w-title">O jogo real<br>de 2026</h2>
+      <p class="w-lede">Antes de plantar, ler o terreno. Cinco anos que mudaram as regras do e-commerce brasileiro — e seis forças que hoje decidem quem sobrevive.</p>
+    </header>
+
+    <div class="arc">
+      <div class="arc-fill" aria-hidden="true"></div>
+      <div class="arc-item rv">
+        <p class="arc-year">2020–2021</p>
+        <p><strong>O boom.</strong> O e-commerce brasileiro salta ~67,5% na pandemia. O dropshipping "fácil" nasce — e começa a morrer cedo: em abril de 2021, o iOS 14.5 (ATT) quebra o rastreamento e dá início à inflação do CAC.</p>
+      </div>
+      <div class="arc-item rv">
+        <p class="arc-year">2022–2023</p>
+        <p><strong>A maturação.</strong> Custos sobem, a loja genérica converte cada vez pior. Nasce a tese do branding dentro do drop. O Remessa Conforme é criado (ago/2023).</p>
+      </div>
+      <div class="arc-item rv">
+        <p class="arc-year">2024</p>
+        <p><strong>A profissionalização.</strong> A "taxa das blusinhas" (20% até US$50) muda a conta do importado. A IA generativa explode e entra na operação.</p>
+      </div>
+      <div class="arc-item rv">
+        <p class="arc-year">2025</p>
+        <p><strong>A virada da descoberta.</strong> O TikTok Shop estreia no Brasil em maio. O ICMS sobe para ~20% em vários estados. A IA vira camada operacional do varejo.</p>
+      </div>
+      <div class="arc-item rv">
+        <p class="arc-year">2026 — hoje</p>
+        <p><strong>O agora.</strong> Imposto federal até US$50 zerado de novo (12/05) — mas o ICMS estadual permanece e a reforma tributária segue em transição. A Meta confirma alta de ~12,5% no custo de anúncio no Brasil. O GMV do TikTok Shop cresce ~102x em um ano.</p>
+      </div>
+    </div>
+
+    <div class="numgrid rv-group">
+      <div class="num card rv"><div class="n-val" data-count="258" data-prefix="R$" data-suffix=" bi">R$258 bi</div><p>projeção do e-commerce BR em 2026 (ABComm) — ticket médio ~R$565</p></div>
+      <div class="num card rv"><div class="n-val" data-count="4" data-prefix="" data-suffix="º">4º</div><p>maior mercado de beleza do mundo é o Brasil, crescendo ~7,2% ao ano</p></div>
+      <div class="num card rv"><div class="n-val" data-count="102" data-prefix="" data-suffix="x">102x</div><p>crescimento do GMV do TikTok Shop no Brasil em um ano</p></div>
+      <div class="num card rv"><div class="n-val" data-count="80" data-prefix="" data-suffix="%+">80%+</div><p>dos novos players quebram o caixa nos 3 primeiros meses — quase sempre por fornecedor e logística</p></div>
+    </div>
+
+    <div class="forcas rv-group">
+      <div class="forca card rv">
+        <p class="f-n">Força 01</p>
+        <h3>A era do genérico acabou</h3>
+        <p>Marca, experiência e atendimento viraram pré-requisito — não diferencial.</p>
+        <p class="f-met">branding é coluna do método, não módulo final.</p>
+      </div>
+      <div class="forca card rv">
+        <p class="f-n">Força 02</p>
+        <h3>A logística nacional venceu</h3>
+        <p>Para operação séria: prazo curto, sem alfândega, menos devolução.</p>
+        <p class="f-met">nacional como padrão de maturidade; internacional para testar.</p>
+      </div>
+      <div class="forca card rv">
+        <p class="f-n">Força 03</p>
+        <h3>Tributação instável</h3>
+        <p>Mudou três vezes em ~2 anos; o IVA vai encarecer o importado até 2033.</p>
+        <p class="f-met">nenhuma margem construída sobre janela de imposto.</p>
+      </div>
+      <div class="forca card rv">
+        <p class="f-n">Força 04</p>
+        <h3>CAC inflando + Meta automatizada</h3>
+        <p>Na era Andrômeda, criativo e sinal mandam mais que segmentação manual.</p>
+        <p class="f-met">peso em oferta + criativo — onde IA com direção humana brilha.</p>
+      </div>
+      <div class="forca card rv">
+        <p class="f-n">Força 05</p>
+        <h3>Discovery commerce</h3>
+        <p>TikTok Shop é a avenida de descoberta barata; beleza e utensílios lideram as lives.</p>
+        <p class="f-met">pilar do método, não apêndice — ainda mais com ela na câmera.</p>
+      </div>
+      <div class="forca card rv">
+        <p class="f-n">Força 06</p>
+        <h3>IA como camada operacional</h3>
+        <p>Personalização e automação já movem receita no varejo inteiro.</p>
+        <p class="f-met">IA como equipe: pesquisa, copy, design, criativo, análise.</p>
+      </div>
+    </div>
+
+    <p class="tese rv">A era do genérico acabou. Não é abrir uma loja — é construir uma marca.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     MUNDO 03 · CLAUDE / IA
+     ============================================================ -->
+<section class="world" id="ia" data-world="ia" data-index="03" data-name="Claude · IA">
+  <div class="world-slash" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="w-head rv">
+      <p class="w-eyebrow"><span class="sl">/</span> Mundo 03 · A equipe — Claude &amp; IA</p>
+      <h2 class="w-title">Vocês não<br>começam sozinhos</h2>
+      <p class="w-lede">Na sessão 2, montamos a equipe: um time de IA dirigido por critério humano. Aceleradora, não milagre — curadoria e direção sempre.</p>
+    </header>
+
+    <div class="equipe rv-group">
+      <div class="card rv"><h3>Pesquisador de mercado</h3><p>Lê qualquer nicho em horas, não semanas: tamanho, players, dores, preço.</p></div>
+      <div class="card rv"><h3>Copywriter</h3><p>Nomes, ofertas, páginas e legendas — sempre com a voz da marca, nunca texto de robô.</p></div>
+      <div class="card rv"><h3>Designer</h3><p>Identidade, mockups e direção de arte. A logo nasce de prompt — e de verificação humana.</p></div>
+      <div class="card rv"><h3>Diretor de criativo</h3><p>Variações de anúncio, edição e produto-em-cena para alimentar o motor de conteúdo.</p></div>
+      <div class="card rv"><h3>Analista</h3><p>Métricas sem autoengano: margem real, funil, decisão de matar, manter ou escalar.</p></div>
+    </div>
+
+    <div class="prompt-line rv" aria-hidden="true">
+      <span class="pl-mark">&gt;</span> leia este mercado como um estrategista de marca: tamanho, saturação, margem típica e o vazio que ninguém ocupa<span class="caret"></span>
+    </div>
+
+    <div class="callout rv">
+      <h3>A IA constrói a cena.<br>Nunca o produto.</h3>
+      <p>Foto e vídeo são sempre do produto verdadeiro — lei do consumidor, política de anúncio, ANVISA quando for beleza. A IA cria o cenário, o mundo e o lifestyle ao redor. Essa linha não se cruza.</p>
+    </div>
+
+    <div class="chips-row">
+      <span class="chip">ChatGPT <b>Plus</b></span>
+      <span class="chip">Claude <b>Pro</b></span>
+      <span class="chip">Canva <b>Pro</b></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MUNDO 04 · FORNECEDOR / SOURCING
+     ============================================================ -->
+<section class="world" id="fornecedor" data-world="fornecedor" data-index="04" data-name="Fornecedor">
+  <div class="world-slash" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="w-head rv">
+      <p class="w-eyebrow"><span class="sl">/</span> Mundo 04 · Terreno → Marca — Sourcing</p>
+      <h2 class="w-title">Produto real<br>não se inventa</h2>
+      <p class="w-lede">Sourcing é decisão de método, não de fé: nacional, internacional ou híbrido — com os trade-offs honestos na mesa, decididos na Matriz de Terreno.</p>
+    </header>
+
+    <div class="tradeoff rv">
+      <div class="to-row head">
+        <div>Dimensão</div><div>Nacional</div><div>Internacional</div>
+      </div>
+      <div class="to-row">
+        <div>Frete dentro do Brasil</div><div class="to-mute">varia por região e peso</div><div class="to-ok">flat para qualquer CEP</div>
+      </div>
+      <div class="to-row">
+        <div>Prazo de entrega</div><div class="to-ok">curto</div><div class="to-mute">longo</div>
+      </div>
+      <div class="to-row">
+        <div>Tributação</div><div class="to-ok">previsível</div><div class="to-mute">instável</div>
+      </div>
+      <div class="to-row">
+        <div>Margem inicial</div><div class="to-mute">custo maior</div><div class="to-ok">custo menor</div>
+      </div>
+      <div class="to-row">
+        <div>Escala de marca</div><div class="to-ok">NF, controle, prazo</div><div class="to-ok">bom para testar</div>
+      </div>
+    </div>
+
+    <div class="callout rv" style="margin-top:48px">
+      <h3>O caminho híbrido</h3>
+      <p>Testar barato — inclusive internacional, com frete flat para qualquer CEP — e migrar o vencedor para nacional ao escalar: prazo, tributo e marca melhores. A decisão é do casal, via método; nunca dogma.</p>
+    </div>
+
+    <div class="raiox rv-group">
+      <div class="card rx-int rv">
+        <h3>Raio-X do frete · tells de drop internacional</h3>
+        <ul>
+          <li>Menção a envios internacionais, alfândega, taxas de liberação</li>
+          <li>Prazo longo e amplo, que só conta após "o envio"</li>
+          <li>"Estoque do fornecedor" e preparo separado do transporte</li>
+          <li>Frete flat nacional + itens do pedido chegando separados</li>
+        </ul>
+      </div>
+      <div class="card rx-nac rv">
+        <h3>Raio-X do frete · tells de operação nacional</h3>
+        <ul>
+          <li>Postagem em até ~2 dias úteis</li>
+          <li>PAC/Sedex nomeados; frete varia por CEP e peso</li>
+          <li>Prazo conta a partir da emissão da nota fiscal</li>
+          <li>CNPJ visível, sem menção a importação</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="marco rv">
+      <span class="m-data">Sessão 9 · 07/07</span>
+      <p><strong>O pedido-teste sai.</strong> É o item de maior lead-time do programa: o produto verdadeiro precisa estar em mãos quando o conteúdo começar, na Fase 4.</p>
+    </div>
+    <p class="nota rv">A principal causa dos 80%+ que quebram nos três primeiros meses é fornecedor e logística ruins. Por isso este mundo vem antes da loja.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     MUNDO 05 · IDENTIDADE / CANVA
+     ============================================================ -->
+<section class="world" id="identidade" data-world="identidade" data-index="05" data-name="Identidade">
+  <div class="world-slash" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="w-head rv">
+      <p class="w-eyebrow"><span class="sl">/</span> Mundo 05 · Identidade — IA + Canva</p>
+      <h2 class="w-title">Identidade 100% IA.<br>Direção 100% humana.</h2>
+      <p class="w-lede">Três sessões dedicadas (13–15) para a marca nascer com cara de marca — não de loja improvisada. A criação é dirigida e verificada por gente; o Canva entra na montagem e exportação.</p>
+    </header>
+
+    <div class="logo-show rv-group">
+      <!-- PLACEHOLDER: assets/logo-marca-zero.png — o fallback tipográfico some quando o PNG chegar -->
+      <figure class="logo-frame rv">
+        <img src="assets/logo-marca-zero.png" alt="Logo Marca Zero" loading="lazy" decoding="async" onerror="this.closest('.logo-frame').classList.add('missing')">
+        <div class="logo-fallback" aria-hidden="true">MARCA<span class="sl">/</span>ZERO</div>
+        <figcaption><b>MARCA / ZERO</b> — a faísca "/" corta o nome: do zero, um golpe de energia.</figcaption>
+      </figure>
+      <!-- PLACEHOLDER: assets/logo-metodo-raiz.png -->
+      <figure class="logo-frame rv">
+        <img src="assets/logo-metodo-raiz.png" alt="Logo Método RAIZ — 6 fases, 6 mundos" loading="lazy" decoding="async" onerror="this.closest('.logo-frame').classList.add('missing')">
+        <div class="logo-fallback" aria-hidden="true">RA<span class="sl">I</span>Z</div>
+        <figcaption><b>MÉTODO RAIZ</b> — o "A" vira árvore e cria raízes: a marca cresce de uma raiz forte.</figcaption>
+      </figure>
+    </div>
+    <p class="nasceram rv">As duas logos deste programa nasceram exatamente assim: IA com direção humana.</p>
+
+    <div class="idchecks rv-group">
+      <div class="card rv"><p class="ck">Grafia correta</p><p>A IA renderiza texto bem — o humano confere letra por letra.</p></div>
+      <div class="card rv"><p class="ck">Legível pequena</p><p>Funciona no avatar, na etiqueta e no favicon — não só no banner.</p></div>
+      <div class="card rv"><p class="ck">Versão mono</p><p>Preto-e-branco resolve? Se só vive com efeito, não é logo.</p></div>
+      <div class="card rv"><p class="ck">Export limpo</p><p>PNG transparente e vetor, prontos para qualquer aplicação.</p></div>
+    </div>
+
+    <div class="marco rv">
+      <span class="m-data">Sessão 17 · 04/08</span>
+      <p><strong>Checkpoint: mini-brandbook.</strong> Posicionamento, arquétipo, naming com domínio e handles travados, símbolo, paleta e sistema aplicado — a marca inteira, pronta para virar loja.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MUNDO 06 · SHOPIFY
+     ============================================================ -->
+<section class="world" id="shopify" data-world="shopify" data-index="06" data-name="Shopify">
+  <div class="world-slash" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="w-head rv">
+      <p class="w-eyebrow"><span class="sl">/</span> Mundo 06 · Vitrine — Shopify</p>
+      <h2 class="w-title">Uma home que<br>vende em segundos</h2>
+      <p class="w-lede">A loja é onde a marca vira experiência de compra. Plataforma travada: Shopify — padrão profissional desde o primeiro dia, consumindo o brandbook inteiro.</p>
+    </header>
+
+    <div class="shop-grid">
+      <div class="browser rv" data-px="-6">
+        <div class="browser-bar"><i></i><i></i><i></i><span>sua-marca.com.br</span></div>
+        <div class="browser-body">
+          <div class="sk sk-nav"></div>
+          <div class="sk sk-hero"></div>
+          <div class="sk-row">
+            <div class="sk sk-card"></div>
+            <div class="sk sk-card"></div>
+            <div class="sk sk-card"></div>
+          </div>
+          <div class="sk sk-cta"></div>
+        </div>
+      </div>
+      <ul class="shop-list rv-group">
+        <li class="rv"><span class="s-n">S.19</span><div><h3>Home que vende em segundos</h3><p>Hierarquia, promessa e prova no primeiro scroll — o visitante entende o que é e por que importa.</p></div></li>
+        <li class="rv"><span class="s-n">S.20</span><div><h3>Coleções e navegação mobile-first</h3><p>Categorias que pensam como o cliente compra — no celular, onde a venda acontece.</p></div></li>
+        <li class="rv"><span class="s-n">S.21–22</span><div><h3>Página de produto que converte</h3><p>Anatomia, copy, SEO, provas, FAQ e gatilhos — com os mockups do kit de identidade.</p></div></li>
+        <li class="rv"><span class="s-n">S.24</span><div><h3>Políticas e confiança</h3><p>Frete honesto, ANVISA e legal em dia, atendimento desenhado — confiança é conversão.</p></div></li>
+      </ul>
+    </div>
+
+    <div class="marco rv">
+      <span class="m-data">Sessão 25 · 01/09</span>
+      <p><strong>Loja no ar.</strong> Compra-teste real e QA mobile completo — checkpoint da Fase 3, com a vitrine aberta para o mundo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MUNDO 07 · CHECKOUT / YEVER
+     ============================================================ -->
+<section class="world" id="checkout" data-world="checkout" data-index="07" data-name="Checkout">
+  <div class="world-slash" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="w-head rv">
+      <p class="w-eyebrow"><span class="sl">/</span> Mundo 07 · Vitrine — Checkout</p>
+      <h2 class="w-title">Onde o ticket<br>cresce</h2>
+      <p class="w-lede">Do carrinho ao Pix em segundos — e cada passo desenhado para subir o ticket médio sem quebrar a confiança de quem compra.</p>
+    </header>
+
+    <div class="flow rv" role="list">
+      <div class="flow-step" role="listitem"><div class="fs-box"><h4>Carrinho</h4><p>sem fricção, sem surpresa de frete</p></div></div>
+      <div class="flow-step" role="listitem"><div class="fs-box"><h4>Checkout</h4><p>poucos campos, confiança visível</p></div></div>
+      <div class="flow-step" role="listitem"><div class="fs-box"><h4>Pix &amp; parcelas</h4><p>o pagamento do jeito do Brasil</p></div></div>
+      <div class="flow-step" role="listitem"><div class="fs-box"><h4>Order bump</h4><p>oferta complementar no ato</p></div></div>
+      <div class="flow-step" role="listitem"><div class="fs-box"><h4>Upsell</h4><p>ticket sobe depois do sim</p></div></div>
+      <div class="flow-step" role="listitem"><div class="fs-box"><h4>Recuperação</h4><p>carrinho e Pix abandonados voltam</p></div></div>
+    </div>
+
+    <div class="decisao rv-group">
+      <div class="card rv">
+        <h3>Yever</h3>
+        <p>Checkout transparente, desenhado para AOV: bump, upsell e recuperação nativos. Mais mecânica de ticket, mais custo de setup.</p>
+      </div>
+      <div class="card rv">
+        <h3>Mercado Pago</h3>
+        <p>Nativo e enxuto para começar: Pix, parcelamento e antifraude prontos, sem fricção de integração.</p>
+      </div>
+    </div>
+
+    <div class="marco rv">
+      <span class="m-data">Sessão 18 · 07/08</span>
+      <p><strong>A decisão fecha ao vivo</strong> — com os números da Fase 2 na mesa, não no achismo. Mecânica completa de ticket entra na sessão 23.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MUNDO 08 · GOOGLE — o único mundo claro
+     ============================================================ -->
+<section class="world" id="google" data-world="google" data-index="08" data-name="Google">
+  <div class="wrap">
+    <header class="w-head rv">
+      <p class="w-eyebrow"><span class="sl">/</span> Mundo 08 · Ser encontrado — Google</p>
+      <h2 class="w-title">Quando procurarem,<br>vocês existem</h2>
+      <p class="w-lede">Marca que não aparece na busca não é marca — é segredo. Aqui o território digital é travado cedo e o orgânico trabalha de graça, para sempre.</p>
+    </header>
+
+    <div class="gsearch rv" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="#4285F4" stroke-width="2"/><path d="M20 20L16.5 16.5" stroke="#4285F4" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="gq" id="gType" data-type="sua marca aqui">sua marca aqui</span><span class="gcaret"></span>
+    </div>
+
+    <div class="gpoints rv-group">
+      <div class="card rv">
+        <p class="g-s">Sessão 12</p>
+        <h3>Território travado</h3>
+        <p>Domínio e handles garantidos antes da logo existir — o nome é de vocês em todos os lugares.</p>
+      </div>
+      <div class="card rv">
+        <p class="g-s">Sessão 21</p>
+        <h3>SEO de produto</h3>
+        <p>Página de produto escrita para gente e para o Google — tráfego que não se paga por clique.</p>
+      </div>
+      <div class="card rv">
+        <p class="g-s">Quando maduro</p>
+        <h3>Shopping &amp; brand search</h3>
+        <p>Google Shopping e busca de marca entram quando a operação valida — sem queimar etapa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MUNDO 09 · TIKTOK SHOP
+     ============================================================ -->
+<section class="world" id="tiktok" data-world="tiktok" data-index="09" data-name="TikTok Shop">
+  <div class="world-slash" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="w-head rv">
+      <p class="w-eyebrow"><span class="sl">/</span> Mundo 09 · Sinal — TikTok Shop</p>
+      <h2 class="w-title">Não é anúncio.<br>É descoberta.</h2>
+      <p class="w-lede">O TikTok Shop estreou no Brasil em maio de 2025 e virou a avenida de descoberta mais barata do mercado — a casa do discovery commerce.</p>
+    </header>
+
+    <div class="tt-grid">
+      <ul class="tt-stats rv-group">
+        <li class="rv"><div class="t-v"><b>~102x</b> em um ano</div><p>crescimento do GMV do TikTok Shop no Brasil</p></li>
+        <li class="rv"><div class="t-v">beleza <b>lidera</b> as lives</div><p>cosméticos e utensílios são as categorias que mais vendem ao vivo</p></li>
+        <li class="rv"><div class="t-v">orgânico <b>desde cedo</b></div><p>descoberta barata antes do primeiro real de mídia paga — canal travado no método</p></li>
+      </ul>
+      <div class="phones rv" data-px="-8" aria-hidden="true">
+        <div class="phone"><span>Gancho<br>0–3s</span></div>
+        <div class="phone"><span>Demo<br>produto real</span></div>
+        <div class="phone"><span>Live<br>+ afiliados</span></div>
+      </div>
+    </div>
+
+    <div class="callout rv">
+      <h3>Ela na câmera é vantagem estrutural</h3>
+      <p>Conteúdo demo-friendly com desenvoltura real, desde a Fase 4 — o rosto da marca construindo audiência enquanto a concorrência paga CPM. Não é detalhe: é estratégia.</p>
+    </div>
+
+    <div class="marco rv">
+      <span class="m-data">S.30 → S.40 → S.46</span>
+      <p><strong>Setup na sessão 30</strong> (18/09) · <strong>primeira live na sessão 40</strong> (23/10) · <strong>lives de pico</strong> no esquenta e na semana da Black Friday.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MUNDO 10 · META
+     ============================================================ -->
+<section class="world" id="meta" data-world="meta" data-index="10" data-name="Meta Ads">
+  <div class="world-slash" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="w-head rv">
+      <p class="w-eyebrow"><span class="sl">/</span> Mundo 10 · Tração — Meta Ads</p>
+      <h2 class="w-title">Tráfego por último<br>é método — não medo</h2>
+      <p class="w-lede">Meta entra quando há criativo e sinal — nunca verba cega. Com CAC inflando (+12,5% no Brasil em 2026) e a automação Andrômeda, criativo e sinal valem mais que qualquer segmentação manual.</p>
+    </header>
+
+    <div class="meta-chips rv">
+      <span class="chip">CPM feed <b>R$15–35</b></span>
+      <span class="chip">CPM stories/reels <b>R$8–20</b></span>
+      <span class="chip">break-even ROAS <b>≈1,7–1,8x</b></span>
+      <span class="chip">conversão iniciante <b>1–2%</b></span>
+    </div>
+
+    <div class="cenarios rv-group">
+      <div class="cenario card rv">
+        <h3>Pé no chão</h3>
+        <div class="c-fat">R$15–30 mil<small>acumulado em 6 meses</small></div>
+        <ul>
+          <li><span>Verba de ads</span><span>R$50–100/dia</span></li>
+          <li><span>ROAS maduro</span><span>~2x</span></li>
+        </ul>
+        <p class="c-verdade"><b>Precisa ser verdade:</b> 1 produto validado, oferta clara, loja confiável.</p>
+      </div>
+      <div class="cenario card rv">
+        <h3>Bom</h3>
+        <div class="c-fat">R$40–70 mil<small>acumulado em 6 meses</small></div>
+        <ul>
+          <li><span>Verba de ads</span><span>R$150–250/dia</span></li>
+          <li><span>ROAS maduro</span><span>~2,3x</span></li>
+        </ul>
+        <p class="c-verdade"><b>Precisa ser verdade:</b> produto vencedor, criativo forte, empurrão de Q4.</p>
+      </div>
+      <div class="cenario card rv">
+        <h3>Agressivo</h3>
+        <div class="c-fat">R$80–120 mil+<small>acumulado em 6 meses</small></div>
+        <ul>
+          <li><span>Verba de ads</span><span>R$300+/dia</span></li>
+          <li><span>ROAS maduro</span><span>~2,5x+</span></li>
+        </ul>
+        <p class="c-verdade"><b>Precisa ser verdade:</b> vencedor escalável, Black Friday bem executada, caixa.</p>
+      </div>
+    </div>
+
+    <p class="disclaimer rv"><strong>Cenários, não promessas.</strong> Meses 1–3 são construção (provável resultado baixo ou negativo); a validação chega no 3–4; a maior parte do faturamento concentra no Q4. Estrutura de validação com pixel/CAPI na sessão 31; primeira campanha no ar na 32; escala controlada na 44.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     MUNDO 11 · JORNADA RAIZ
+     ============================================================ -->
+<section class="world" id="jornada" data-world="jornada" data-index="11" data-name="Jornada RAIZ">
+  <div class="world-slash" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="w-head rv">
+      <p class="w-eyebrow"><span class="sl">/</span> Mundo 11 · O mapa — Método RAIZ</p>
+      <h2 class="w-title">Do solo<br>ao fruto</h2>
+      <p class="w-lede">Seis fases, 53 sessões presenciais — terças e sextas, 2h — de 09 de junho a 08 de dezembro de 2026. A raiz cresce primeiro; o fruto vem no Q4.</p>
+    </header>
+
+    <div class="jr-grid">
+      <aside class="jr-rail" aria-hidden="true">
+        <div class="jr-sticky">
+          <p class="w-eyebrow"><span class="sl">/</span> fase ativa</p>
+          <div class="jr-words">
+            <span class="is-active" data-w="1">Terreno</span>
+            <span data-w="2">Marca</span>
+            <span data-w="3">Vitrine</span>
+            <span data-w="4">Sinal</span>
+            <span data-w="5">Tração</span>
+            <span data-w="6">Escala</span>
+          </div>
+          <svg class="jr-svg" viewBox="0 0 120 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="rootGrad" x1="60" y1="0" x2="60" y2="620" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#C8D890"/>
+                <stop offset=".55" stop-color="#99AC62"/>
+                <stop offset="1" stop-color="#67843C"/>
+              </linearGradient>
+            </defs>
+            <path class="taproot" pathLength="1" d="M60 8 C 57 90, 63 160, 60 215 C 57 300, 63 360, 60 420 C 58 490, 62 550, 60 612"/>
+            <g class="jr-node" data-node="1">
+              <path d="M60 60 C 48 70, 40 78, 32 96"/>
+              <circle cx="60" cy="60" r="4"/>
+            </g>
+            <g class="jr-node" data-node="2">
+              <path d="M60 160 C 72 170, 80 178, 90 194"/>
+              <circle cx="60" cy="160" r="4"/>
+            </g>
+            <g class="jr-node" data-node="3">
+              <path d="M60 260 C 48 272, 42 282, 36 300"/>
+              <circle cx="60" cy="260" r="4"/>
+            </g>
+            <g class="jr-node" data-node="4">
+              <path d="M60 360 C 72 372, 78 382, 84 402"/>
+              <circle cx="60" cy="360" r="4"/>
+            </g>
+            <g class="jr-node" data-node="5">
+              <path d="M60 460 C 50 472, 44 484, 40 504"/>
+              <circle cx="60" cy="460" r="4"/>
+            </g>
+            <g class="jr-node" data-node="6">
+              <path d="M60 560 C 70 572, 76 584, 80 604"/>
+              <circle cx="60" cy="560" r="4"/>
+            </g>
+          </svg>
+        </div>
+      </aside>
+
+      <div class="jr-phases">
+        <div class="jr-phase card rv" data-phase="1">
+          <div class="ph-top"><h3><i>Fase 1</i>Terreno</h3><span class="ph-meta">8 encontros · 09/06 → 03/07</span></div>
+          <p>Onde plantar. O jogo real de 2026, a equipe de IA, leitura de mercado, longlist de nichos, banco de referências, sourcing e conformidade — até a Matriz de Terreno decidir nicho, território e sourcing.</p>
+          <p class="ph-meta-line">Brief de Origem aprovado.</p>
+          <span class="ph-anda">Everton co-pilota forte</span>
+        </div>
+        <div class="jr-phase card rv" data-phase="2">
+          <div class="ph-top"><h3><i>Fase 2</i>Marca</h3><span class="ph-meta">9 encontros · 07/07 → 04/08</span></div>
+          <p>O que construir. Produto-herói e pedido-teste, precificação que sobrevive, posicionamento, naming com domínio travado e a identidade visual construída com IA em três sessões — até a oferta.</p>
+          <p class="ph-meta-line">Mini-brandbook + pedido-teste a caminho.</p>
+          <span class="ph-anda">Everton co-pilota</span>
+        </div>
+        <div class="jr-phase card rv" data-phase="3">
+          <div class="ph-top"><h3><i>Fase 3</i>Vitrine</h3><span class="ph-meta">8 encontros · 07/08 → 01/09</span></div>
+          <p>Onde vender. Arquitetura da loja e decisão de checkout, home, coleções mobile-first, página de produto que converte, mecânica de ticket, políticas e confiança.</p>
+          <p class="ph-meta-line">Loja no ar, testada com compra real.</p>
+          <span class="ph-anda">Executa junto</span>
+        </div>
+        <div class="jr-phase card rv" data-phase="4">
+          <div class="ph-top"><h3><i>Fase 4</i>Sinal</h3><span class="ph-meta">8 encontros · 04/09 → 29/09</span></div>
+          <p>Atrair e ler a resposta. Linha editorial com ela como rosto, criativo que vende, produção com o produto real, criativos com IA, TikTok Shop ativo, Meta estruturada — primeira campanha no ar.</p>
+          <p class="ph-meta-line">Primeiros dados, lidos sem autoengano.</p>
+          <span class="ph-anda">Supervisiona</span>
+        </div>
+        <div class="jr-phase card rv" data-phase="5">
+          <div class="ph-top"><h3><i>Fase 5</i>Tração</h3><span class="ph-meta">8 encontros · 02/10 → 27/10</span></div>
+          <p>Confirmar o que funciona. Métricas que importam, diagnóstico de funil, otimização de criativo e oferta, matar-manter-escalar com critérios frios, recompra e LTV, primeira live.</p>
+          <p class="ph-meta-line">Unit economics: a conta fecha — ou pivota com método.</p>
+          <span class="ph-anda">Eles dirigem · supervisiona</span>
+        </div>
+        <div class="jr-phase card rv" data-phase="6">
+          <div class="ph-top"><h3><i>Fase 6</i>Escala</h3><span class="ph-meta">12 encontros · 30/10 → 08/12</span></div>
+          <p>Multiplicar. Operação preparada para volume, estratégia de Q4, oferta de Black Friday com urgência real, aquecimento e captura, a Black Friday gerida ao vivo — e o playbook que fica.</p>
+          <p class="ph-meta-line">Operação documentada + voo solo.</p>
+          <span class="ph-anda">Eles dirigem · aconselha</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="andaime rv">
+      <h3><span class="sl">/</span> o andaime decai — transferência de autonomia</h3>
+      <div class="anda-bar">
+        <div class="anda-step"><div class="a-bar"></div><h4>Co-pilota</h4><p>Fases 1–2 — mão na massa junto, decisão guiada</p></div>
+        <div class="anda-step"><div class="a-bar"></div><h4>Executa junto</h4><p>Fase 3 — constroem lado a lado</p></div>
+        <div class="anda-step"><div class="a-bar"></div><h4>Supervisiona</h4><p>Fases 4–5 — eles fazem, ele corrige o rumo</p></div>
+        <div class="anda-step"><div class="a-bar"></div><h4>Aconselha</h4><p>Fase 6 — eles operam; ao fim, voam sozinhos</p></div>
+      </div>
+    </div>
+
+    <div class="marcos rv">
+      <h3><span class="sl">/</span> marcos no trilho</h3>
+      <ul class="marcos-list">
+        <li><span class="mc-d">07/07</span><span class="mc-t">Pedido-teste sai — o produto real entra em rota</span><span class="mc-s">sessão 9</span></li>
+        <li><span class="mc-d">01/09</span><span class="mc-t">Loja no ar, com compra-teste real</span><span class="mc-s">sessão 25</span></li>
+        <li><span class="mc-d">25/09</span><span class="mc-t">Primeira campanha no ar — Meta + TikTok + orgânico</span><span class="mc-s">sessão 32</span></li>
+        <li><span class="mc-d">27/10</span><span class="mc-t">Unit economics: a conta fecha?</span><span class="mc-s">sessão 41</span></li>
+        <li class="bf"><span class="mc-d">27/11</span><span class="mc-t"><b>Black Friday ao vivo</b> — o pico gerido em tempo real</span><span class="mc-s">sessão 50</span></li>
+        <li><span class="mc-d">08/12</span><span class="mc-t">Voo solo — plano de 90 dias e encerramento</span><span class="mc-s">sessão 53</span></li>
+      </ul>
+    </div>
+
+    <p class="jr-sucesso rv">Sucesso definido: primeiras vendas + indícios de lucro. O resto é consequência.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     MUNDO 12 · CTA / ONBOARDING
+     ============================================================ -->
+<section class="world" id="inicio" data-world="inicio" data-index="12" data-name="Começo">
+  <div class="world-slash" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="w-head rv">
+      <p class="w-eyebrow"><span class="sl">/</span> Mundo 12 · O começo</p>
+      <h2 class="w-title">A raiz começa antes<br>da primeira venda</h2>
+      <p class="w-lede">Uma marca construída do zero, com método, IA e visão de longo prazo — sem promessa de enriquecimento rápido, com trade-offs reais na mesa.</p>
+    </header>
+
+    <p class="cta-start rv">Começamos<br><b>09 <span class="sl">/</span> junho</b></p>
+
+    <div class="cta-chips rv">
+      <span class="chip">presencial</span>
+      <span class="chip">terças <b>&amp;</b> sextas</span>
+      <span class="chip"><b>2h</b> por sessão</span>
+      <span class="chip">26 semanas</span>
+    </div>
+
+    <div class="cta-check rv">
+      <h3><span class="sl">/</span> prontos para a sessão 1</h3>
+      <ul>
+        <li>ChatGPT Plus, Claude Pro e Canva Pro ativos — a equipe de IA contratada</li>
+        <li>Tempo reservado: terças e sextas, 2h, sem furo</li>
+        <li>Mente de dono: as decisões de nicho, sourcing e checkout são de vocês — via método</li>
+      </ul>
+    </div>
+
+    <div class="cta-lockup rv" aria-label="Marca Zero — Método RAIZ">
+      MARCA<span class="sl">/</span><span class="lz">ZERO</span>
+    </div>
+    <p class="cta-tag rv">método raiz — 6 fases <span class="sl">/</span> 6 mundos</p>
+
+    <footer>
+      <svg class="f-roots" viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M280 4 C 278 40, 282 70, 280 116"/>
+        <path d="M280 28 C 250 48, 222 58, 196 88"/>
+        <path d="M280 28 C 310 48, 338 58, 364 88"/>
+        <path d="M280 52 C 240 74, 200 82, 160 108"/>
+        <path d="M280 52 C 320 74, 360 82, 400 108"/>
+        <path d="M280 76 C 256 92, 232 100, 208 114"/>
+        <path d="M280 76 C 304 92, 328 100, 352 114"/>
+      </svg>
+      <p class="f-line">Marca Zero · Método RAIZ — mentoria individual conduzida por Everton Stedile · 2026</p>
+    </footer>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================
+     MOTORES — Lenis (desktop) + GSAP ScrollTrigger (pesado/crítico)
+     ============================================================ -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var doc = document.documentElement;
+  doc.classList.add('js');
+
+  var reduce  = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine    = matchMedia('(pointer: fine)').matches;
+  var hasGSAP = !!(window.gsap && window.ScrollTrigger);
+  var motion  = !reduce;
+
+  if (motion) doc.classList.add('motion');
+  if (motion && hasGSAP) doc.classList.add('gsap');
+
+  /* ---------- LENIS — só desktop (pointer fine); mobile = toque nativo [LEI] ---------- */
+  var lenis = null;
+  if (motion && fine && window.Lenis) {
+    lenis = new Lenis({ duration: 1.05, smoothWheel: true, syncTouch: false });
+    if (hasGSAP) {
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
+      gsap.ticker.lagSmoothing(0);
+    } else {
+      var rafLenis = function (t) { lenis.raf(t); requestAnimationFrame(rafLenis); };
+      requestAnimationFrame(rafLenis);
+    }
+  }
+
+  /* âncoras passam pelo motor quando ele existe */
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var el = document.querySelector(a.getAttribute('href'));
+      if (el && lenis) { e.preventDefault(); lenis.scrollTo(el, { offset: 0 }); }
+    });
+  });
+
+  /* ---------- MUNDO ATIVO — contador "/", chrome e paleta ---------- */
+  var worlds  = Array.prototype.slice.call(document.querySelectorAll('.world'));
+  var chIdx   = document.getElementById('chIdx');
+  var chName  = document.getElementById('chName');
+
+  var worldIO = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      var w = en.target;
+      document.body.dataset.world = w.dataset.world;
+      if (chIdx)  chIdx.textContent  = w.dataset.index;
+      if (chName) chName.textContent = w.dataset.name;
+      var i = worlds.indexOf(w);
+      railNodes.forEach(function (n, k) { n.classList.toggle('lit', k <= i); });
+    });
+  }, { rootMargin: '-46% 0px -46% 0px', threshold: 0 });
+  worlds.forEach(function (w) { worldIO.observe(w); });
+
+  /* ---------- TRILHO-RAIZ — nós por mundo + crescimento no scroll ---------- */
+  var rail = document.getElementById('rail');
+  var railNodes = [];
+  function buildRailNodes() {
+    railNodes.forEach(function (n) { n.remove(); });
+    railNodes = [];
+    var docH = document.documentElement.scrollHeight;
+    worlds.forEach(function (w) {
+      var node = document.createElement('span');
+      node.className = 'rail-node';
+      node.style.top = ((w.offsetTop + w.offsetHeight * 0.5) / docH * 100) + '%';
+      rail.appendChild(node);
+      railNodes.push(node);
+    });
+  }
+  buildRailNodes();
+  addEventListener('resize', buildRailNodes);
+
+  /* ---------- REVEALS — vanilla IO (canhão só no crítico) ---------- */
+  if (motion) {
+    var rvIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('on'); rvIO.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+    document.querySelectorAll('.rv').forEach(function (el) { rvIO.observe(el); });
+  }
+
+  /* ---------- CONTADORES (mercado) ---------- */
+  if (motion) {
+    var fmtCount = function (el, v) {
+      el.textContent = (el.dataset.prefix || '') + v + (el.dataset.suffix || '');
+    };
+    var countIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        countIO.unobserve(en.target);
+        var el  = en.target;
+        var end = parseInt(el.dataset.count, 10);
+        var t0  = null;
+        var DUR = 1300;
+        function step(ts) {
+          if (!t0) t0 = ts;
+          var p = Math.min((ts - t0) / DUR, 1);
+          var e = 1 - Math.pow(1 - p, 3); /* easeOutCubic */
+          fmtCount(el, Math.round(end * e));
+          if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      });
+    }, { threshold: 0.6 });
+    document.querySelectorAll('[data-count]').forEach(function (el) { countIO.observe(el); });
+  }
+
+  /* ---------- TYPEWRITER (google) ---------- */
+  if (motion) {
+    var gt = document.getElementById('gType');
+    if (gt) {
+      var full = gt.dataset.type;
+      var typeIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          typeIO.unobserve(gt);
+          gt.textContent = '';
+          var i = 0;
+          (function tick() {
+            if (i <= full.length) {
+              gt.textContent = full.slice(0, i);
+              i++;
+              setTimeout(tick, 75);
+            }
+          })();
+        });
+      }, { threshold: 0.7 });
+      typeIO.observe(gt);
+    }
+  }
+
+  /* ---------- FASE ATIVA DA JORNADA (rail sticky + nós da raiz) ---------- */
+  var phaseWords = document.querySelectorAll('.jr-words span');
+  var phaseNodes = document.querySelectorAll('.jr-node');
+  var phaseIO = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      var ph = en.target.dataset.phase;
+      phaseWords.forEach(function (s) { s.classList.toggle('is-active', s.dataset.w === ph); });
+      phaseNodes.forEach(function (n) { n.classList.toggle('is-active', parseInt(n.dataset.node, 10) <= parseInt(ph, 10)); });
+    });
+  }, { rootMargin: '-42% 0px -42% 0px', threshold: 0 });
+  document.querySelectorAll('.jr-phase').forEach(function (p) { phaseIO.observe(p); });
+
+  /* ---------- HERO VÍDEO — fonte por aspecto e codec; src só quando há motion ---------- */
+  var heroVid = document.getElementById('heroVid');
+  if (heroVid && motion) {
+    var portrait = matchMedia('(max-aspect-ratio: 3/4)').matches;
+    var canMp4 = heroVid.canPlayType('video/mp4; codecs="avc1.42E01E"');
+    heroVid.src = 'assets/video/hero-bg' + (portrait ? '-9x16' : '') + (canMp4 ? '.mp4' : '.webm');
+    if (!hasGSAP) { /* sem motor: o vídeo vira atmosfera em loop */
+      heroVid.loop = true;
+      var p = heroVid.play();
+      if (p && p.catch) p.catch(function () {});
+    }
+  }
+
+  /* ---------- GSAP — o pesado e crítico ---------- */
+  if (motion && hasGSAP) {
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* ABERTURA — video-scroll real: o scroll toca o vídeo (keyframes densos -g 5);
+       a logo fica composta por cima, visível desde o primeiro frame */
+    if (heroVid) {
+      var bindScrub = function () {
+        var dur = Math.max(0.01, heroVid.duration - 0.06);
+        gsap.fromTo(heroVid, { currentTime: 0 }, {
+          currentTime: dur, ease: 'none',
+          scrollTrigger: { trigger: '#heroTrack', start: 'top top', end: 'bottom bottom', scrub: 0.5 }
+        });
+      };
+      if (heroVid.readyState >= 1) bindScrub();
+      else heroVid.addEventListener('loadedmetadata', bindScrub, { once: true });
+    }
+    var heroTl = gsap.timeline({
+      scrollTrigger: { trigger: '#heroTrack', start: 'top top', end: 'bottom bottom', scrub: 0.6 }
+    });
+    heroTl
+      .fromTo('.hero-brand', { scale: 1.05 }, { scale: 1, duration: 1.5, ease: 'none' })
+      .fromTo('.hero-sub',   { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.6, ease: 'none' }, '-=0.5')
+      .fromTo('.hero-chips', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.6, ease: 'none' }, '-=0.3')
+      .to('.hero-inner', { y: '-5vh', scale: 0.965, opacity: 0.55, duration: 1.2, ease: 'none' }, '+=0.9');
+    gsap.to('.hero-hint', {
+      opacity: 0,
+      scrollTrigger: { trigger: '#heroTrack', start: '2% top', end: '12% top', scrub: true }
+    });
+
+    /* TRILHO-RAIZ — cresce com o progresso global */
+    gsap.to('#rail-fill', {
+      scaleY: 1, ease: 'none',
+      scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.4 }
+    });
+
+    /* MERCADO — linha do tempo que se preenche */
+    gsap.to('.arc-fill', {
+      scaleY: 1, ease: 'none',
+      scrollTrigger: { trigger: '.arc', start: 'top 72%', end: 'bottom 55%', scrub: 0.5 }
+    });
+
+    /* JORNADA — a raiz se desenha enquanto as fases passam */
+    gsap.to('.jr-svg .taproot', {
+      strokeDashoffset: 0, ease: 'none',
+      scrollTrigger: { trigger: '.jr-phases', start: 'top 65%', end: 'bottom 60%', scrub: 0.5 }
+    });
+
+    /* FAÍSCA "/" — varre a tela na troca de mundo */
+    document.querySelectorAll('.world-slash').forEach(function (sl) {
+      gsap.fromTo(sl,
+        { x: '-12vw', opacity: 0 },
+        {
+          x: '112vw',
+          opacity: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sl.parentElement,
+            start: 'top 92%',
+            end: 'top 30%',
+            scrub: 0.4,
+            onLeave: function () { gsap.set(sl, { opacity: 0 }); }
+          }
+        });
+    });
+
+    /* PARALLAX sutil nos palcos (browser shopify, phones tiktok) */
+    document.querySelectorAll('[data-px]').forEach(function (el) {
+      gsap.to(el, {
+        yPercent: parseFloat(el.dataset.px), ease: 'none',
+        scrollTrigger: { trigger: el.closest('.world'), start: 'top bottom', end: 'bottom top', scrub: 0.6 }
+      });
+    });
+
+    /* refresh quando fontes/altura estabilizarem */
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () { ScrollTrigger.refresh(); buildRailNodes(); });
+    }
+    addEventListener('load', function () { ScrollTrigger.refresh(); buildRailNodes(); });
+  }
+})();
+</script>
+</body>
+</html>

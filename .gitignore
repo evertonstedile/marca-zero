@@ -1,0 +1,7 @@
+# Estratégia/metodologia — contexto local apenas, NUNCA publicar
+marca-zero-documento-mae.md
+marca-zero-build-prompt.md
+
+# Infra
+node_modules/
+.DS_Store
