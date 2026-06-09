@@ -239,20 +239,22 @@ html.gsap .hero-track{ height:320vh }
 }
 html.gsap .hero-stage{ position:sticky; top:0; height:100vh; overflow:hidden }
 
-.hero-inner{ padding-inline:24px; position:relative; z-index:2; width:100% }
+.hero-inner{ padding-inline:24px; position:relative; width:100% }
+/* ATENÇÃO: sem z-index/transform em .hero-inner — stacking context aqui isola o
+   mix-blend da .hero-brand e o fundo preto do PNG deixa de sumir sobre o vídeo */
 .hero-eyebrow{
   font-family:var(--font-display); font-weight:300;
   font-size:.72rem; letter-spacing:.5em; text-transform:uppercase;
   color:rgba(239,239,229,.55);
 }
 
-/* o vídeo é o palco; a logo real é composta POR CIMA */
+/* o vídeo é o palco; a logo real é composta POR CIMA (ordem do DOM, sem z-index) */
 .hero-vid{
   position:absolute; inset:0; width:100%; height:100%;
-  object-fit:cover; z-index:0;
+  object-fit:cover;
 }
 .hero-shade{ /* vinheta leve para legibilidade da logo e do texto */
-  position:absolute; inset:0; z-index:1; pointer-events:none;
+  position:absolute; inset:0; pointer-events:none;
   background:
     radial-gradient(ellipse 95% 75% at 50% 50%, transparent 42%, rgba(4,9,10,.5) 100%),
     linear-gradient(180deg, rgba(4,9,10,.38) 0%, transparent 26% 72%, rgba(4,9,10,.62) 100%);
@@ -261,16 +263,15 @@ html.gsap .hero-stage{ position:sticky; top:0; height:100vh; overflow:hidden }
   position:relative;
   width:clamp(300px,56vw,800px);
   margin:40px auto 0;
+  /* sem mix-blend: o hero usa o derivado com ALPHA REAL (logo-marca-zero-hero.png);
+     blend sobre <video> é instável entre browsers/camadas de GPU */
+  will-change:transform,opacity;
 }
 .hero-brand .hero-glow{ /* flare ATRÁS do wordmark — nunca por cima */
   position:absolute; inset:-46% -18%; z-index:-1; pointer-events:none;
   background:radial-gradient(ellipse 58% 46% at 50% 52%, rgba(200,216,144,.16), transparent 72%);
 }
-.hero-logo{
-  width:100%;
-  mix-blend-mode:screen; /* fundo preto do PNG desaparece sobre o vídeo */
-  will-change:transform,opacity;
-}
+.hero-logo{ width:100% }
 .hero-fallback{
   display:none;
   font-family:var(--font-display); font-weight:200;
@@ -1041,8 +1042,8 @@ footer{
         <p class="hero-eyebrow">Mentoria individual · Método RAIZ</p>
         <h1 class="hero-brand" aria-label="Marca Zero">
           <span class="hero-glow" aria-hidden="true"></span>
-          <!-- PLACEHOLDER: assets/logo-marca-zero.png — fallback tipográfico assume se o PNG faltar -->
-          <img class="hero-logo" src="assets/logo-marca-zero.png" alt="Marca Zero" decoding="async"
+          <!-- derivado com alpha real do master assets/logo-marca-zero.png -->
+          <img class="hero-logo" src="assets/logo-marca-zero-hero.png" alt="Marca Zero" decoding="async"
                onerror="this.closest('.hero-brand').classList.add('missing')">
           <span class="hero-fallback" aria-hidden="true">MARCA<span class="sl">/</span><span class="lz">ZERO</span></span>
         </h1>
@@ -1860,11 +1861,13 @@ footer{
     var heroTl = gsap.timeline({
       scrollTrigger: { trigger: '#heroTrack', start: 'top top', end: 'bottom bottom', scrub: 0.6 }
     });
+    /* exit anima brand e textos SEPARADOS — transform no .hero-inner isolaria o blend */
     heroTl
       .fromTo('.hero-brand', { scale: 1.05 }, { scale: 1, duration: 1.5, ease: 'none' })
       .fromTo('.hero-sub',   { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.6, ease: 'none' }, '-=0.5')
       .fromTo('.hero-chips', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.6, ease: 'none' }, '-=0.3')
-      .to('.hero-inner', { y: '-5vh', scale: 0.965, opacity: 0.55, duration: 1.2, ease: 'none' }, '+=0.9');
+      .to('.hero-brand', { y: '-5vh', scale: 0.96, opacity: 0.55, duration: 1.2, ease: 'none' }, '+=0.9')
+      .to('.hero-eyebrow, .hero-sub, .hero-chips', { y: '-5vh', opacity: 0.4, duration: 1.2, ease: 'none' }, '<');
     gsap.to('.hero-hint', {
       opacity: 0,
       scrollTrigger: { trigger: '#heroTrack', start: '2% top', end: '12% top', scrub: true }
