@@ -239,6 +239,29 @@ html.gsap #rail-fill{ transform:scaleY(0) }
 }
 body[data-world="google"] #rail::before{ background:rgba(4,9,10,.14) }
 
+/* coachmark: ensina que os nós do trilho navegam (some no 1º clique ou em 9s) */
+.rail-hint{
+  position:fixed; left:calc(clamp(12px,2.4vw,30px) + 26px); top:21%;
+  z-index:41; pointer-events:none;
+  font-family:var(--font-display); font-weight:300;
+  font-size:.62rem; letter-spacing:.26em; text-transform:uppercase;
+  color:var(--mz-cream);
+  background:rgba(7,13,14,.94);
+  border:1px solid var(--line); border-radius:8px;
+  padding:.7em 1.2em;
+  display:flex; align-items:center; gap:.8em;
+  opacity:0; transform:translateX(-6px);
+  transition:opacity .5s var(--ease), transform .5s var(--ease);
+}
+.rail-hint .sl{ color:var(--mz-green) }
+.rail-hint::before{
+  content:""; position:absolute; left:-14px; top:50%;
+  width:14px; height:1px;
+  background:linear-gradient(90deg, var(--mz-green), rgba(153,172,98,.2));
+}
+.rail-hint.show{ opacity:1; transform:none }
+@media (max-width:1020px){ .rail-hint{ display:none } }
+
 /* grain anti-slop (feTurbulence) */
 #grain{
   position:fixed; inset:-2%; z-index:60; pointer-events:none;
@@ -1174,7 +1197,14 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
   position:relative; width:clamp(270px,42vw,540px);
   will-change:transform,opacity;
 }
-.f-logo img{ width:100% }
+.f-logo::before{ /* scrim: garante leitura da logo sobre o feixe claro */
+  content:""; position:absolute; inset:-30% -22%; z-index:-1;
+  background:radial-gradient(ellipse 58% 52% at 50% 50%, rgba(4,9,10,.72) 0%, rgba(4,9,10,.4) 55%, transparent 78%);
+}
+.f-logo img{
+  width:100%;
+  filter:drop-shadow(0 2px 26px rgba(4,9,10,.9)) drop-shadow(0 0 60px rgba(4,9,10,.55));
+}
 .f-line{
   position:absolute; left:0; right:0; bottom:22px;
   text-align:center;
@@ -1264,6 +1294,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
 <div id="rail" aria-hidden="true">
   <div id="rail-fill"></div>
 </div>
+<div id="railHint" class="rail-hint" aria-hidden="true"><span class="sl">/</span> clique nos nós para navegar</div>
 <div id="grain" aria-hidden="true"></div>
 
 <main>
@@ -2168,6 +2199,20 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
   buildRailNodes();
   addEventListener('resize', buildRailNodes);
 
+  /* ---------- COACHMARK do trilho (desktop): some no 1º uso ou em 9s ---------- */
+  var railHint = document.getElementById('railHint');
+  if (railHint && motion && fine && matchMedia('(min-width: 1021px)').matches) {
+    var hideHint = function () {
+      railHint.classList.remove('show');
+      rail.removeEventListener('click', hideHint, true);
+    };
+    setTimeout(function () {
+      railHint.classList.add('show');
+      setTimeout(hideHint, 9000);
+    }, 2200);
+    rail.addEventListener('click', hideHint, true);
+  }
+
   /* ---------- ÍNDICE OVERLAY — abre pelo contador do chrome ---------- */
   var navIndex = document.getElementById('navIndex');
   var navBtn = document.getElementById('navBtn');
@@ -2191,6 +2236,8 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
     });
     navIndex.classList.add('open');
     doc.classList.add('nav-open');
+    var rh = document.getElementById('railHint');
+    if (rh) rh.classList.remove('show');
     navBtn.setAttribute('aria-expanded', 'true');
     if (lenis) lenis.stop();
     document.addEventListener('keydown', navTrap);
@@ -2372,40 +2419,58 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         var fzBrs = fz.querySelectorAll('.fz-br');
         var mBack = document.querySelector('#metodo .metodo-back');
         var mfItems = document.querySelectorAll('#metodo .mf-item');
-        var SLOT = 0.34;
+        var stage = document.getElementById('metodoPin');
+
+        /* "volta pra linha": vetor do centro do palco até o nó da fase i */
+        var slotDelta = function (i, axis) {
+          var s = fzFases[i].getBoundingClientRect();
+          var g = stage.getBoundingClientRect();
+          if (axis === 'x') return s.left + s.width / 2 - (g.left + g.width / 2);
+          return s.top + 20 - (g.top + g.height / 2);
+        };
+
         var fzTl = gsap.timeline({
-          scrollTrigger: { trigger: '#metodoPin', start: 'top 10%', end: '+=320%', scrub: 0.5, pin: true }
+          scrollTrigger: {
+            trigger: '#metodoPin', start: 'top 10%', end: '+=520%',
+            scrub: 0.6, pin: true, invalidateOnRefresh: true
+          }
         });
+
+        /* sequência ESTRITAMENTE serial por fase:
+           raiz avança → número sobe → segura → número VOLTA PRA LINHA
+           (viaja até o nó, encolhendo) e a fase assenta → raiz segue */
+        var t = 0;
+        var D_SEG = 0.16, D_BR = 0.06, D_IN = 0.10, D_HOLD = 0.07, D_RET = 0.11, D_GAP = 0.05;
         fzFases.forEach(function (fase, i) {
           var seg0 = Math.round(1000 * (1 - i / 6));
           var seg1 = Math.round(1000 * (1 - (i + 1) / 6));
-          var t0 = i * SLOT;
-          /* raiz avança até o nó (segmentos explícitos — ver fix do autoRound) */
-          fzTl.fromTo(fzMain,
-            { strokeDashoffset: seg0 },
-            { strokeDashoffset: seg1, duration: 0.18, ease: 'none', immediateRender: false }, t0);
-          fzTl.fromTo(fzBrs[i],
-            { strokeDashoffset: 1000 },
-            { strokeDashoffset: 0, duration: 0.08, ease: 'none', immediateRender: false }, t0 + 0.12);
-          /* a fase assenta no seu nó (em segundo plano)… */
-          fzTl.fromTo(fase,
-            { opacity: 0, scale: 0.7, y: 14 },
-            { opacity: 1, scale: 1, y: 0, duration: 0.1, ease: 'none' }, t0 + 0.13);
-          /* …e o número entra GRANDE e centralizado */
+
+          fzTl.fromTo(fzMain, { strokeDashoffset: seg0 },
+            { strokeDashoffset: seg1, duration: D_SEG, ease: 'none', immediateRender: false }, t);
+          fzTl.fromTo(fzBrs[i], { strokeDashoffset: 1000 },
+            { strokeDashoffset: 0, duration: D_BR, ease: 'none', immediateRender: false }, t + D_SEG - D_BR);
+          t += D_SEG;
+
           fzTl.fromTo(mfItems[i],
-            { opacity: 0, scale: 0.82, y: 20 },
-            { opacity: 1, scale: 1, y: 0, duration: 0.09, ease: 'none' }, t0 + 0.16);
-          fzTl.to(mfItems[i],
-            { opacity: 0, scale: 1.06, y: -16, duration: 0.08, ease: 'none' }, t0 + SLOT - 0.04);
+            { opacity: 0, scale: 0.7, x: 0, y: 26 },
+            { opacity: 1, scale: 1, x: 0, y: 0, duration: D_IN, ease: 'none' }, t);
+          t += D_IN + D_HOLD;
+
+          fzTl.to(mfItems[i], {
+            x: function () { return slotDelta(i, 'x'); },
+            y: function () { return slotDelta(i, 'y'); },
+            scale: 0.18, opacity: 0, duration: D_RET, ease: 'none'
+          }, t);
+          fzTl.fromTo(fase,
+            { opacity: 0, scale: 0.7, y: 10 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.06, ease: 'none' }, t + D_RET - 0.05);
+          t += D_RET + D_GAP;
         });
-        /* fundo em segundo plano durante toda a sequência de foco */
-        var focusStart = 0.16;
-        var focusEnd = 5 * SLOT + SLOT - 0.04 + 0.08;
-        fzTl.fromTo(mBack,
-          { filter: 'blur(0px)', opacity: 1 },
-          { filter: 'blur(6px)', opacity: 0.38, duration: 0.12, ease: 'none', immediateRender: false }, focusStart);
-        fzTl.to(mBack,
-          { filter: 'blur(0px)', opacity: 1, duration: 0.16, ease: 'none' }, focusEnd);
+
+        /* fundo desfocado do primeiro número até o último voltar */
+        fzTl.fromTo(mBack, { filter: 'blur(0px)', opacity: 1 },
+          { filter: 'blur(6px)', opacity: 0.38, duration: 0.1, ease: 'none', immediateRender: false }, D_SEG);
+        fzTl.to(mBack, { filter: 'blur(0px)', opacity: 1, duration: 0.12, ease: 'none' }, t - D_GAP);
         fzTl.to({}, { duration: 0.1 }); /* respiro antes do unpin */
       });
       fzMM.add('(max-width: 1020px)', function () {
