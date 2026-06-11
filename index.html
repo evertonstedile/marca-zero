@@ -108,8 +108,76 @@ em{ font-style:normal }
   font-family:var(--font-display); font-weight:300;
   font-size:.74rem; letter-spacing:.3em;
   display:flex; align-items:baseline; gap:.7em;
+  /* é um botão: abre o índice dos mundos */
+  background:none; border:0; padding:6px 2px;
+  color:inherit; cursor:pointer; pointer-events:auto;
 }
 .ch-counter .sl{ color:inherit; opacity:.65 }
+
+/* ===== ÍNDICE OVERLAY — 13 mundos agrupados pelas 6 fases ===== */
+html.nav-open{ overflow:clip }
+.nav-index{
+  position:fixed; inset:0; z-index:55;
+  background:
+    radial-gradient(ellipse 60% 42% at 50% 0%, rgba(103,132,60,.1), transparent 70%),
+    rgba(4,9,10,.988);
+  overflow-y:auto;
+  opacity:0; visibility:hidden; transform:translateY(14px);
+  transition:opacity .45s var(--ease), transform .45s var(--ease), visibility 0s linear .45s;
+}
+.nav-index.open{
+  opacity:1; visibility:visible; transform:none;
+  transition:opacity .45s var(--ease), transform .45s var(--ease);
+}
+.ni-inner{ padding-block:clamp(28px,6vh,64px) }
+.ni-head{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:clamp(30px,6vh,54px);
+}
+.ni-close{
+  background:none; border:1px solid var(--line); border-radius:50%;
+  width:44px; height:44px; flex:none;
+  color:var(--mz-cream); cursor:pointer; font-size:1rem; line-height:1;
+  transition:border-color .45s var(--ease), color .45s var(--ease);
+}
+.ni-close:hover, .ni-close:focus-visible{ border-color:var(--mz-green); color:var(--mz-green-light) }
+.ni-groups{
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:clamp(26px,5vh,56px) clamp(28px,4vw,64px);
+  padding-bottom:8vh;
+}
+.ni-group h3{
+  font-family:var(--font-display); font-weight:300;
+  font-size:.72rem; letter-spacing:.3em; text-transform:uppercase;
+  color:var(--mz-green);
+  border-bottom:1px solid var(--line);
+  padding-bottom:12px; margin-bottom:8px;
+}
+.ni-group h3 i{
+  font-style:normal; font-size:.6rem; letter-spacing:.3em;
+  color:rgba(239,239,229,.4); margin-right:12px;
+}
+.ni-group ul{ list-style:none }
+.ni-group button{
+  display:flex; align-items:baseline; gap:14px; width:100%;
+  background:none; border:0; cursor:pointer; text-align:left;
+  padding:12px 10px; border-radius:10px;
+  font-family:var(--font-display); font-weight:300;
+  font-size:clamp(.95rem,1.4vw,1.08rem); letter-spacing:.12em; text-transform:uppercase;
+  color:var(--mz-cream);
+  transition:background .35s var(--ease);
+}
+.ni-group button i{
+  font-style:normal; font-size:.66rem; letter-spacing:.22em;
+  color:var(--mz-green); width:2.4em; flex:none;
+}
+@media (hover:hover){ .ni-group button:hover{ background:rgba(239,239,229,.05) } }
+.ni-group button:focus-visible{ outline:1px solid var(--mz-green); outline-offset:2px }
+.ni-group button.is-now{
+  background:rgba(153,172,98,.1);
+  box-shadow:inset 2px 0 0 var(--mz-green);
+}
+@media (max-width:900px){ .ni-groups{ grid-template-columns:1fr; gap:30px } }
 .ch-counter em{
   font-size:.62rem; letter-spacing:.32em; opacity:.55; text-transform:uppercase;
 }
@@ -130,18 +198,44 @@ em{ font-style:normal }
   will-change:transform;
 }
 html.gsap #rail-fill{ transform:scaleY(0) }
+/* nós do trilho = navegação primária no desktop (hitbox 24px, tooltip no hover) */
 .rail-node{
-  position:absolute; left:50%; width:7px; height:7px;
+  position:absolute; left:50%; width:24px; height:24px;
   transform:translate(-50%,-50%);
-  border-radius:50%;
+  background:none; border:0; padding:0;
+  cursor:pointer; pointer-events:auto;
+}
+.rail-node::before{ /* o nó visual */
+  content:""; position:absolute; left:50%; top:50%;
+  width:7px; height:7px; border-radius:50%;
+  transform:translate(-50%,-50%);
   background:var(--mz-black);
   border:1px solid rgba(239,239,229,.25);
   transition:background .6s var(--ease), border-color .6s var(--ease), box-shadow .6s var(--ease);
 }
-.rail-node.lit{
+.rail-node.lit::before{
   background:var(--mz-green);
   border-color:var(--mz-green-light);
   box-shadow:0 0 10px rgba(153,172,98,.55);
+}
+.rail-node:focus-visible{ outline:none }
+.rail-node:focus-visible::before{ box-shadow:0 0 0 3px rgba(200,216,144,.4) }
+.rail-node::after{ /* tooltip: "04 · Fornecedor" */
+  content:attr(data-tip);
+  position:absolute; left:24px; top:50%;
+  transform:translateY(-50%) translateX(-4px);
+  white-space:nowrap;
+  font-family:var(--font-display); font-weight:300;
+  font-size:.6rem; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--mz-cream);
+  background:rgba(7,13,14,.94);
+  border:1px solid var(--line); border-radius:8px;
+  padding:.6em 1.1em;
+  opacity:0; pointer-events:none;
+  transition:opacity .35s var(--ease), transform .35s var(--ease);
+}
+.rail-node:hover::after, .rail-node:focus-visible::after{
+  opacity:1; transform:translateY(-50%) translateX(0);
 }
 body[data-world="google"] #rail::before{ background:rgba(4,9,10,.14) }
 
@@ -399,10 +493,43 @@ html.gsap .arc-fill{ transform:scaleY(0) }
     radial-gradient(ellipse 44% 26% at 50% 58%, rgba(200,216,144,.05), transparent 75%),
     var(--mz-black);
 }
+.metodo-pin{ position:relative; margin-top:clamp(36px,5vh,56px) }
+.metodo-back{ will-change:filter,opacity }
 .metodo-logo{
   position:relative;
-  width:clamp(280px,46vw,580px);
-  margin:clamp(36px,5vh,56px) auto 0;
+  width:clamp(240px,32vw,440px);
+  margin:0 auto;
+}
+/* camada de foco: o número da fase GRANDE e centralizado sobre o fundo em blur */
+.metodo-focus{
+  position:absolute; inset:0; z-index:2;
+  display:grid; place-items:center;
+  pointer-events:none;
+}
+.mf-item{ grid-area:1/1; text-align:center; opacity:0; padding-inline:24px; will-change:transform,opacity }
+.mf-num{
+  display:block;
+  font-family:var(--font-display); font-weight:200;
+  font-size:clamp(5.5rem,15vw,10.5rem); line-height:.95; letter-spacing:.04em;
+  background:var(--grad-title);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+.mf-name{
+  display:block; margin-top:10px;
+  font-family:var(--font-display); font-weight:300;
+  font-size:clamp(1.15rem,2.4vw,1.7rem); letter-spacing:.34em; text-transform:uppercase;
+  color:var(--mz-cream);
+}
+.mf-item p{ margin:14px auto 0; max-width:40ch; font-size:.95rem; color:rgba(239,239,229,.62) }
+html:not(.gsap) .metodo-focus{ display:none }
+@media (min-width:1021px){
+  html.gsap .metodo-pin{ height:80vh; display:flex; flex-direction:column }
+  html.gsap .metodo-pin .metodo-back{
+    flex:1; display:flex; flex-direction:column;
+    justify-content:space-between; padding-block:2vh;
+  }
+  html.gsap .metodo-pin .fases{ margin-top:0 }
 }
 .metodo-logo .mglow{
   position:absolute; inset:-42% -24%; z-index:-1; pointer-events:none;
@@ -1059,6 +1186,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
    ============================================================ */
 @media (max-width:1020px){
   .numgrid{ grid-template-columns:repeat(2,1fr) }
+  .metodo-focus{ display:none }
   .fz-svg{ display:none }
   .fases-grid{ grid-template-columns:1fr; gap:30px 0; position:relative; margin-top:0 }
   .fases-grid::before{
@@ -1128,10 +1256,10 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
 <!-- CHROME FIXO -->
 <header id="chrome">
   <a class="ch-mark" href="#abertura">MARCA<span class="sl">/</span>ZERO</a>
-  <div class="ch-counter">
+  <button id="navBtn" class="ch-counter" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="navIndex" title="Abrir índice dos mundos">
     <span id="chIdx">01</span><span class="sl">/</span><span>13</span>
     <em id="chName">Abertura</em>
-  </div>
+  </button>
 </header>
 <div id="rail" aria-hidden="true">
   <div id="rail-fill"></div>
@@ -1271,37 +1399,52 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       <p class="w-lede">A resposta ao jogo de 2026 não é um truque de tráfego — é método. Mercado e marca antes de anúncio; cada fase alimenta a próxima, do solo ao fruto.</p>
     </header>
 
-    <div class="metodo-logo rv" data-px="-4" aria-label="Método RAIZ — 6 fases, 6 mundos">
-      <span class="mglow" aria-hidden="true"></span>
-      <img src="assets/logo-metodo-raiz-hero.webp" alt="Método RAIZ" loading="lazy" decoding="async"
-           onerror="this.closest('.metodo-logo').classList.add('missing')">
-      <span class="m-fallback" aria-hidden="true">RA<span class="sl">I</span>Z</span>
-    </div>
+    <div class="metodo-pin" id="metodoPin">
+      <div class="metodo-back">
+        <div class="metodo-logo" aria-label="Método RAIZ — 6 fases, 6 mundos">
+          <span class="mglow" aria-hidden="true"></span>
+          <img src="assets/logo-metodo-raiz-hero.webp" alt="Método RAIZ" loading="lazy" decoding="async"
+               onerror="this.closest('.metodo-logo').classList.add('missing')">
+          <span class="m-fallback" aria-hidden="true">RA<span class="sl">I</span>Z</span>
+        </div>
 
-    <div class="fases" aria-label="As 6 fases do método">
-      <svg class="fz-svg" viewBox="0 0 1200 118" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <linearGradient id="fzGrad" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#C8D890"/>
-            <stop offset=".5" stop-color="#99AC62"/>
-            <stop offset="1" stop-color="#67843C"/>
-          </linearGradient>
-        </defs>
-        <path class="fz-main" pathLength="1000" d="M0 34 C 50 22, 96 46, 150 36 S 250 18, 310 34 S 410 50, 470 34 S 560 18, 630 34 S 740 50, 800 32 S 900 18, 970 34 S 1100 46, 1200 30"/>
-        <path class="fz-br" pathLength="1000" d="M100 32 C 94 56, 90 76, 82 104"/>
-        <path class="fz-br" pathLength="1000" d="M300 30 C 306 56, 310 78, 318 106"/>
-        <path class="fz-br" pathLength="1000" d="M500 36 C 494 60, 490 80, 484 104"/>
-        <path class="fz-br" pathLength="1000" d="M700 32 C 706 58, 712 78, 720 106"/>
-        <path class="fz-br" pathLength="1000" d="M900 30 C 894 56, 890 76, 884 102"/>
-        <path class="fz-br" pathLength="1000" d="M1100 36 C 1106 58, 1110 78, 1116 104"/>
-      </svg>
-      <div class="fases-grid">
-        <div class="fase rv"><h3><i>Fase 1</i>Terreno</h3><p>Onde plantar: o mercado é lido antes de qualquer produto.</p></div>
-        <div class="fase rv"><h3><i>Fase 2</i>Marca</h3><p>O que construir: produto-herói, oferta e identidade.</p></div>
-        <div class="fase rv"><h3><i>Fase 3</i>Vitrine</h3><p>Onde vender: a loja que transforma marca em compra.</p></div>
-        <div class="fase rv"><h3><i>Fase 4</i>Sinal</h3><p>Atrair e ler a resposta: conteúdo, criativo, primeira tração.</p></div>
-        <div class="fase rv"><h3><i>Fase 5</i>Tração</h3><p>Confirmar o que funciona: a conta fecha — ou pivota com método.</p></div>
-        <div class="fase rv"><h3><i>Fase 6</i>Escala</h3><p>Multiplicar: Q4, Black Friday e autonomia.</p></div>
+        <div class="fases" aria-label="As 6 fases do método">
+          <svg class="fz-svg" viewBox="0 0 1200 118" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="fzGrad" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#C8D890"/>
+                <stop offset=".5" stop-color="#99AC62"/>
+                <stop offset="1" stop-color="#67843C"/>
+              </linearGradient>
+            </defs>
+            <path class="fz-main" pathLength="1000" d="M0 34 C 50 22, 96 46, 150 36 S 250 18, 310 34 S 410 50, 470 34 S 560 18, 630 34 S 740 50, 800 32 S 900 18, 970 34 S 1100 46, 1200 30"/>
+            <path class="fz-br" pathLength="1000" d="M100 32 C 94 56, 90 76, 82 104"/>
+            <path class="fz-br" pathLength="1000" d="M300 30 C 306 56, 310 78, 318 106"/>
+            <path class="fz-br" pathLength="1000" d="M500 36 C 494 60, 490 80, 484 104"/>
+            <path class="fz-br" pathLength="1000" d="M700 32 C 706 58, 712 78, 720 106"/>
+            <path class="fz-br" pathLength="1000" d="M900 30 C 894 56, 890 76, 884 102"/>
+            <path class="fz-br" pathLength="1000" d="M1100 36 C 1106 58, 1110 78, 1116 104"/>
+          </svg>
+          <div class="fases-grid">
+            <div class="fase rv"><h3><i>Fase 1</i>Terreno</h3><p>Onde plantar: o mercado é lido antes de qualquer produto.</p></div>
+            <div class="fase rv"><h3><i>Fase 2</i>Marca</h3><p>O que construir: produto-herói, oferta e identidade.</p></div>
+            <div class="fase rv"><h3><i>Fase 3</i>Vitrine</h3><p>Onde vender: a loja que transforma marca em compra.</p></div>
+            <div class="fase rv"><h3><i>Fase 4</i>Sinal</h3><p>Atrair e ler a resposta: conteúdo, criativo, primeira tração.</p></div>
+            <div class="fase rv"><h3><i>Fase 5</i>Tração</h3><p>Confirmar o que funciona: a conta fecha — ou pivota com método.</p></div>
+            <div class="fase rv"><h3><i>Fase 6</i>Escala</h3><p>Multiplicar: Q4, Black Friday e autonomia.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- camada de foco: cada fase apresentada GRANDE e centralizada; o fundo
+           (logo + raiz + faixa) permanece visível em segundo plano com blur -->
+      <div class="metodo-focus" aria-hidden="true">
+        <div class="mf-item"><span class="mf-num">1</span><span class="mf-name">Terreno</span><p>Onde plantar: o mercado é lido antes de qualquer produto.</p></div>
+        <div class="mf-item"><span class="mf-num">2</span><span class="mf-name">Marca</span><p>O que construir: produto-herói, oferta e identidade.</p></div>
+        <div class="mf-item"><span class="mf-num">3</span><span class="mf-name">Vitrine</span><p>Onde vender: a loja que transforma marca em compra.</p></div>
+        <div class="mf-item"><span class="mf-num">4</span><span class="mf-name">Sinal</span><p>Atrair e ler a resposta: conteúdo, criativo, primeira tração.</p></div>
+        <div class="mf-item"><span class="mf-num">5</span><span class="mf-name">Tração</span><p>Confirmar o que funciona: a conta fecha — ou pivota com método.</p></div>
+        <div class="mf-item"><span class="mf-num">6</span><span class="mf-name">Escala</span><p>Multiplicar: Q4, Black Friday e autonomia.</p></div>
       </div>
     </div>
 
@@ -1843,6 +1986,61 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
 
 </main>
 
+<!-- ÍNDICE DOS MUNDOS — navegação overlay, agrupada pelas 6 fases RAIZ -->
+<div id="navIndex" class="nav-index" role="dialog" aria-modal="true" aria-label="Índice dos mundos">
+  <div class="ni-inner wrap">
+    <div class="ni-head">
+      <p class="w-eyebrow"><span class="sl">/</span> Índice — 6 fases · 13 mundos</p>
+      <button id="niClose" class="ni-close" type="button" aria-label="Fechar índice">✕</button>
+    </div>
+    <div class="ni-groups">
+      <section class="ni-group">
+        <h3><i>Fase 1</i>Terreno</h3>
+        <ul>
+          <li><button type="button" data-go="0"><i>01</i>Abertura</button></li>
+          <li><button type="button" data-go="1"><i>02</i>Mercado</button></li>
+          <li><button type="button" data-go="2"><i>03</i>Método RAIZ</button></li>
+          <li><button type="button" data-go="3"><i>04</i>Claude &amp; IA</button></li>
+          <li><button type="button" data-go="4"><i>05</i>Fornecedor</button></li>
+        </ul>
+      </section>
+      <section class="ni-group">
+        <h3><i>Fase 2</i>Marca</h3>
+        <ul>
+          <li><button type="button" data-go="5"><i>06</i>Identidade</button></li>
+        </ul>
+      </section>
+      <section class="ni-group">
+        <h3><i>Fase 3</i>Vitrine</h3>
+        <ul>
+          <li><button type="button" data-go="6"><i>07</i>Shopify</button></li>
+          <li><button type="button" data-go="7"><i>08</i>Checkout</button></li>
+          <li><button type="button" data-go="8"><i>09</i>Google</button></li>
+        </ul>
+      </section>
+      <section class="ni-group">
+        <h3><i>Fase 4</i>Sinal</h3>
+        <ul>
+          <li><button type="button" data-go="9"><i>10</i>TikTok Shop</button></li>
+        </ul>
+      </section>
+      <section class="ni-group">
+        <h3><i>Fase 5</i>Tração</h3>
+        <ul>
+          <li><button type="button" data-go="10"><i>11</i>Meta Ads</button></li>
+        </ul>
+      </section>
+      <section class="ni-group">
+        <h3><i>Fase 6</i>Escala</h3>
+        <ul>
+          <li><button type="button" data-go="11"><i>12</i>Jornada RAIZ</button></li>
+          <li><button type="button" data-go="12"><i>13</i>O começo</button></li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
+
 <!-- ============================================================
      MOTORES — Lenis (desktop) + GSAP ScrollTrigger (pesado/crítico)
      ============================================================ -->
@@ -1878,11 +2076,27 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
     }
   }
 
-  /* âncoras passam pelo motor quando ele existe */
+  /* ---------- NAVEGAÇÃO ENTRE MUNDOS ----------
+     Destino = topo da section (âncora pós-pin: os pin-spacers anteriores já
+     constam no fluxo, e nenhum destino cai no meio de um pin).
+     Scroll programático SEMPRE via lenis.scrollTo (nunca scrollIntoView);
+     mobile usa window.scrollTo smooth; reduced-motion pula instantâneo. */
+  function goToWorld(idx) {
+    var w = worlds[idx];
+    if (!w) return;
+    var y = w.getBoundingClientRect().top + window.scrollY + 2;
+    if (!motion) { window.scrollTo(0, y); return; }
+    if (lenis) lenis.scrollTo(y, { duration: 1.2 });
+    else window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+
+  /* âncoras do chrome passam pela mesma rota */
   document.querySelectorAll('a[href^="#"]').forEach(function (a) {
     a.addEventListener('click', function (e) {
       var el = document.querySelector(a.getAttribute('href'));
-      if (el && lenis) { e.preventDefault(); lenis.scrollTo(el, { offset: 0 }); }
+      if (!el) return;
+      e.preventDefault();
+      goToWorld(worlds.indexOf(el));
     });
   });
 
@@ -1939,16 +2153,68 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
     railNodes.forEach(function (n) { n.remove(); });
     railNodes = [];
     var docH = document.documentElement.scrollHeight;
-    worlds.forEach(function (w) {
-      var node = document.createElement('span');
+    worlds.forEach(function (w, i) {
+      var node = document.createElement('button');
+      node.type = 'button';
       node.className = 'rail-node';
-      node.style.top = ((w.offsetTop + w.offsetHeight * 0.5) / docH * 100) + '%';
+      node.dataset.tip = w.dataset.index + ' · ' + w.dataset.name;
+      node.setAttribute('aria-label', 'Ir para o mundo ' + w.dataset.index + ' — ' + w.dataset.name);
+      node.style.top = ((w.getBoundingClientRect().top + window.scrollY + w.offsetHeight * 0.5) / docH * 100) + '%';
+      node.addEventListener('click', function () { goToWorld(i); });
       rail.appendChild(node);
       railNodes.push(node);
     });
   }
   buildRailNodes();
   addEventListener('resize', buildRailNodes);
+
+  /* ---------- ÍNDICE OVERLAY — abre pelo contador do chrome ---------- */
+  var navIndex = document.getElementById('navIndex');
+  var navBtn = document.getElementById('navBtn');
+  var niClose = document.getElementById('niClose');
+  var navLastFocus = null;
+
+  function navTrap(e) {
+    if (e.key === 'Escape') { closeNav(); return; }
+    if (e.key !== 'Tab') return;
+    var focusables = navIndex.querySelectorAll('button');
+    var first = focusables[0], last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  function openNav() {
+    navLastFocus = document.activeElement;
+    var current = document.body.dataset.world;
+    var idx = worlds.findIndex(function (w) { return w.dataset.world === current; });
+    navIndex.querySelectorAll('[data-go]').forEach(function (b) {
+      b.classList.toggle('is-now', parseInt(b.dataset.go, 10) === idx);
+    });
+    navIndex.classList.add('open');
+    doc.classList.add('nav-open');
+    navBtn.setAttribute('aria-expanded', 'true');
+    if (lenis) lenis.stop();
+    document.addEventListener('keydown', navTrap);
+    niClose.focus();
+  }
+  function closeNav() {
+    navIndex.classList.remove('open');
+    doc.classList.remove('nav-open');
+    navBtn.setAttribute('aria-expanded', 'false');
+    if (lenis) lenis.start();
+    document.removeEventListener('keydown', navTrap);
+    if (navLastFocus && navLastFocus.focus) navLastFocus.focus();
+  }
+  if (navBtn && navIndex) {
+    navBtn.addEventListener('click', function () {
+      navIndex.classList.contains('open') ? closeNav() : openNav();
+    });
+    niClose.addEventListener('click', closeNav);
+    navIndex.addEventListener('click', function (e) {
+      if (e.target === navIndex || e.target.classList.contains('ni-inner')) closeNav(); /* clique fora da lista */
+      var go = e.target.closest('[data-go]');
+      if (go) { closeNav(); goToWorld(parseInt(go.dataset.go, 10)); }
+    });
+  }
 
   /* ---------- REVEALS — vanilla IO (canhão só no crítico) ---------- */
   if (motion) {
@@ -2093,39 +2359,54 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       scrollTrigger: { trigger: '.arc', start: 'top 72%', end: 'bottom 55%', scrub: 0.5 }
     });
 
-    /* MÉTODO — pin na faixa: a raiz se desenha com o scroll e cada fase entra em
-       FOCO (nasce grande na tela) → assenta no tamanho normal → a próxima cresce */
+    /* MÉTODO — palco pinado (logo no topo o tempo todo): a raiz se desenha com o
+       scroll; a cada nó, o NÚMERO da fase aparece GRANDE e centralizado enquanto
+       o fundo (logo + raiz + faixa) fica em segundo plano com blur */
     var fz = document.querySelector('#metodo .fases');
     if (fz) {
       var fzFases = fz.querySelectorAll('.fase');
       var fzMM = gsap.matchMedia();
       fzMM.add('(min-width: 1021px)', function () {
         fzFases.forEach(function (f) { f.classList.remove('rv'); });
-        var fzTl = gsap.timeline({
-          scrollTrigger: { trigger: fz, start: 'center 60%', end: '+=140%', scrub: 0.5, pin: true }
-        });
-        /* a main desenha em 6 segmentos fromTo explícitos (determinístico, sem captura
-           lazy de estado) — cada segmento alcança o nó na hora em que a fase nasce */
         var fzMain = fz.querySelector('.fz-main');
         var fzBrs = fz.querySelectorAll('.fz-br');
+        var mBack = document.querySelector('#metodo .metodo-back');
+        var mfItems = document.querySelectorAll('#metodo .mf-item');
+        var SLOT = 0.34;
+        var fzTl = gsap.timeline({
+          scrollTrigger: { trigger: '#metodoPin', start: 'top 10%', end: '+=320%', scrub: 0.5, pin: true }
+        });
         fzFases.forEach(function (fase, i) {
           var seg0 = Math.round(1000 * (1 - i / 6));
           var seg1 = Math.round(1000 * (1 - (i + 1) / 6));
-          var t0 = i * 0.2;
+          var t0 = i * SLOT;
+          /* raiz avança até o nó (segmentos explícitos — ver fix do autoRound) */
           fzTl.fromTo(fzMain,
             { strokeDashoffset: seg0 },
-            { strokeDashoffset: seg1, duration: 0.2, ease: 'none', immediateRender: false }, t0);
+            { strokeDashoffset: seg1, duration: 0.18, ease: 'none', immediateRender: false }, t0);
           fzTl.fromTo(fzBrs[i],
             { strokeDashoffset: 1000 },
-            { strokeDashoffset: 0, duration: 0.1, ease: 'none', immediateRender: false }, t0 + 0.1);
-          /* nasce em destaque… */
+            { strokeDashoffset: 0, duration: 0.08, ease: 'none', immediateRender: false }, t0 + 0.12);
+          /* a fase assenta no seu nó (em segundo plano)… */
           fzTl.fromTo(fase,
-            { opacity: 0, scale: 0.6, y: 22 },
-            { opacity: 1, scale: 1.35, y: -6, duration: 0.12, ease: 'none' }, t0 + 0.11);
-          /* …e assenta enquanto a próxima cresce */
-          fzTl.to(fase, { scale: 1, y: 0, duration: 0.1, ease: 'none' }, t0 + 0.28);
+            { opacity: 0, scale: 0.7, y: 14 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.1, ease: 'none' }, t0 + 0.13);
+          /* …e o número entra GRANDE e centralizado */
+          fzTl.fromTo(mfItems[i],
+            { opacity: 0, scale: 0.82, y: 20 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.09, ease: 'none' }, t0 + 0.16);
+          fzTl.to(mfItems[i],
+            { opacity: 0, scale: 1.06, y: -16, duration: 0.08, ease: 'none' }, t0 + SLOT - 0.04);
         });
-        fzTl.to({}, { duration: 0.14 }); /* respiro: a última assenta antes do unpin */
+        /* fundo em segundo plano durante toda a sequência de foco */
+        var focusStart = 0.16;
+        var focusEnd = 5 * SLOT + SLOT - 0.04 + 0.08;
+        fzTl.fromTo(mBack,
+          { filter: 'blur(0px)', opacity: 1 },
+          { filter: 'blur(6px)', opacity: 0.38, duration: 0.12, ease: 'none', immediateRender: false }, focusStart);
+        fzTl.to(mBack,
+          { filter: 'blur(0px)', opacity: 1, duration: 0.16, ease: 'none' }, focusEnd);
+        fzTl.to({}, { duration: 0.1 }); /* respiro antes do unpin */
       });
       fzMM.add('(max-width: 1020px)', function () {
         fzFases.forEach(function (f) {
