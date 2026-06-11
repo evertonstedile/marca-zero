@@ -424,6 +424,9 @@ html.gsap .arc-fill{ transform:scaleY(0) }
 .fz-svg path{ fill:none; stroke:url(#fzGrad); stroke-linecap:round }
 .fz-svg .fz-main{ stroke-width:2 }
 .fz-svg .fz-br{ stroke-width:1.2; opacity:.75 }
+/* desenho via offset (mesma técnica do taproot da Jornada — dasharray no CSS,
+   GSAP anima só o offset; evita o risco de unidade px no dasharray inline) */
+html.gsap .fz-svg path{ stroke-dasharray:1000; stroke-dashoffset:1000 }
 .fases-grid{
   display:grid; grid-template-columns:repeat(6,1fr); gap:0 18px;
   margin-top:-4px;
@@ -851,7 +854,7 @@ html.motion .gsearch .gcaret{ animation:caret 1.1s steps(1) infinite }
 .jr-svg .taproot{
   stroke:url(#rootGrad); stroke-width:2; fill:none; stroke-linecap:round;
 }
-html.gsap .jr-svg .taproot{ stroke-dasharray:1; stroke-dashoffset:1 }
+html.gsap .jr-svg .taproot{ stroke-dasharray:1000; stroke-dashoffset:1000 }
 .jr-node circle{
   fill:#04090A; stroke:rgba(239,239,229,.3); stroke-width:1;
   transition:fill .6s var(--ease), stroke .6s var(--ease);
@@ -1020,29 +1023,35 @@ html:not(.motion) .jr-node path{ stroke-dashoffset:0 }
   font-family:var(--font-display); font-weight:300; font-size:.66rem;
   letter-spacing:.5em; text-transform:uppercase; color:rgba(239,239,229,.42);
 }
-footer{
-  margin-top:clamp(54px,7vh,84px); position:relative;
-  padding:0 0 34px;
-}
-/* a raiz aterra com o PRÓPRIO filme da marca: trecho em que a raiz cresce */
+footer{ margin-top:clamp(54px,7vh,84px); position:relative; padding:0 }
+/* fechamento video-scroll: a raiz do filme cresce com o scroll e a logo RAIZ
+   se materializa sobre ela (o A da logo cai no feixe central do vídeo) */
+.f-track{ position:relative }
+html.gsap .f-track{ height:220vh }
 .f-stage{
-  position:relative;
-  height:clamp(230px,36vh,380px);
-  overflow:clip;
+  position:relative; min-height:78svh; overflow:clip;
+  display:grid; place-items:center;
 }
+html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
 #footVid{
   position:absolute; inset:0; width:100%; height:100%;
-  object-fit:cover; object-position:50% 32%;
+  object-fit:cover; object-position:50% 38%;
 }
 .f-mask{
   position:absolute; inset:0; pointer-events:none;
   background:
-    linear-gradient(180deg, var(--mz-black) 0%, transparent 28% 68%, var(--mz-black) 100%),
-    linear-gradient(90deg, var(--mz-black) 0%, transparent 18% 82%, var(--mz-black) 100%);
+    radial-gradient(ellipse 92% 80% at 50% 55%, transparent 44%, rgba(4,9,10,.62) 100%),
+    linear-gradient(180deg, var(--mz-black) 0%, transparent 16% 80%, rgba(4,9,10,.88) 100%);
 }
+.f-logo{
+  position:relative; width:clamp(270px,42vw,540px);
+  will-change:transform,opacity;
+}
+.f-logo img{ width:100% }
 .f-line{
-  margin-top:26px; text-align:center;
-  font-size:.74rem; color:rgba(239,239,229,.38); letter-spacing:.06em;
+  position:absolute; left:0; right:0; bottom:22px;
+  text-align:center;
+  font-size:.74rem; color:rgba(239,239,229,.45); letter-spacing:.06em;
 }
 
 /* ============================================================
@@ -1278,13 +1287,13 @@ footer{
             <stop offset="1" stop-color="#67843C"/>
           </linearGradient>
         </defs>
-        <path class="fz-main" pathLength="1" d="M0 34 C 50 22, 96 46, 150 36 S 250 18, 310 34 S 410 50, 470 34 S 560 18, 630 34 S 740 50, 800 32 S 900 18, 970 34 S 1100 46, 1200 30"/>
-        <path class="fz-br" pathLength="1" d="M100 32 C 94 56, 90 76, 82 104"/>
-        <path class="fz-br" pathLength="1" d="M300 30 C 306 56, 310 78, 318 106"/>
-        <path class="fz-br" pathLength="1" d="M500 36 C 494 60, 490 80, 484 104"/>
-        <path class="fz-br" pathLength="1" d="M700 32 C 706 58, 712 78, 720 106"/>
-        <path class="fz-br" pathLength="1" d="M900 30 C 894 56, 890 76, 884 102"/>
-        <path class="fz-br" pathLength="1" d="M1100 36 C 1106 58, 1110 78, 1116 104"/>
+        <path class="fz-main" pathLength="1000" d="M0 34 C 50 22, 96 46, 150 36 S 250 18, 310 34 S 410 50, 470 34 S 560 18, 630 34 S 740 50, 800 32 S 900 18, 970 34 S 1100 46, 1200 30"/>
+        <path class="fz-br" pathLength="1000" d="M100 32 C 94 56, 90 76, 82 104"/>
+        <path class="fz-br" pathLength="1000" d="M300 30 C 306 56, 310 78, 318 106"/>
+        <path class="fz-br" pathLength="1000" d="M500 36 C 494 60, 490 80, 484 104"/>
+        <path class="fz-br" pathLength="1000" d="M700 32 C 706 58, 712 78, 720 106"/>
+        <path class="fz-br" pathLength="1000" d="M900 30 C 894 56, 890 76, 884 102"/>
+        <path class="fz-br" pathLength="1000" d="M1100 36 C 1106 58, 1110 78, 1116 104"/>
       </svg>
       <div class="fases-grid">
         <div class="fase rv"><h3><i>Fase 1</i>Terreno</h3><p>Onde plantar: o mercado é lido antes de qualquer produto.</p></div>
@@ -1692,7 +1701,7 @@ footer{
                 <stop offset="1" stop-color="#67843C"/>
               </linearGradient>
             </defs>
-            <path class="taproot" pathLength="1" d="M60 8 C 57 90, 63 160, 60 215 C 57 300, 63 360, 60 420 C 58 490, 62 550, 60 612"/>
+            <path class="taproot" pathLength="1000" d="M60 8 C 57 90, 63 160, 60 215 C 57 300, 63 360, 60 420 C 58 490, 62 550, 60 612"/>
             <g class="jr-node" data-node="1">
               <path d="M60 60 C 48 70, 40 78, 32 96"/>
               <circle cx="60" cy="60" r="4"/>
@@ -1816,13 +1825,18 @@ footer{
     <p class="cta-tag rv">método raiz — 6 fases <span class="sl">/</span> 6 mundos</p>
 
     <footer>
-      <!-- a raiz aterra com o próprio filme da marca (trecho em que a raiz cresce);
-           toca uma vez quando o rodapé entra e congela no último frame -->
-      <div class="f-stage" aria-hidden="true">
-        <video id="footVid" muted playsinline preload="none" poster="assets/video/footer-roots-end.webp"></video>
-        <div class="f-mask"></div>
+      <!-- fechamento video-scroll: rolar o trecho final faz a raiz do filme crescer
+           em tela cheia; a logo MÉTODO RAIZ se materializa sincronizada sobre o feixe -->
+      <div class="f-track" id="fTrack">
+        <div class="f-stage">
+          <video id="footVid" muted playsinline preload="none" poster="assets/video/footer-roots-end.webp" aria-hidden="true"></video>
+          <div class="f-mask" aria-hidden="true"></div>
+          <div class="f-logo" aria-label="Método RAIZ — 6 fases, 6 mundos">
+            <img src="assets/logo-metodo-raiz-hero.webp" alt="Método RAIZ" decoding="async">
+          </div>
+          <p class="f-line">Marca Zero · Método RAIZ — mentoria individual conduzida por Everton Stedile · 2026</p>
+        </div>
       </div>
-      <p class="f-line">Marca Zero · Método RAIZ — mentoria individual conduzida por Everton Stedile · 2026</p>
     </footer>
   </div>
 </section>
@@ -1872,20 +1886,32 @@ footer{
     });
   });
 
-  /* ---------- RODAPÉ — a raiz cresce uma vez quando o rodapé entra em cena ---------- */
+  /* ---------- RODAPÉ — vídeo lazy (carrega ~2 telas antes); sem GSAP toca uma vez ---------- */
   var footVid = document.getElementById('footVid');
   if (footVid && motion) {
+    var footBase = 'assets/video/footer-roots' + (matchMedia('(max-aspect-ratio: 3/4)').matches ? '-9x16' : '');
+    var canF = footVid.canPlayType('video/mp4; codecs="avc1.42E01E"');
+    footVid.addEventListener('error', function () {
+      console.warn('[footer] vídeo falhou: ' + (footVid.currentSrc || footVid.src));
+      if (!footVid.dataset.retried) {
+        footVid.dataset.retried = '1';
+        footVid.src = footBase + (canF ? '.webm' : '.mp4');
+        footVid.load();
+      }
+    });
     var footIO = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         if (!en.isIntersecting) return;
-        footIO.unobserve(footVid);
-        var canF = footVid.canPlayType('video/mp4; codecs="avc1.42E01E"');
-        footVid.src = 'assets/video/footer-roots' + (canF ? '.mp4' : '.webm');
-        var pf = footVid.play(); /* sem loop: termina e congela no último frame */
-        if (pf && pf.catch) pf.catch(function () {});
+        footIO.disconnect();
+        footVid.src = footBase + (canF ? '.mp4' : '.webm');
+        footVid.load();
+        if (!hasGSAP) { /* sem motor: toca uma vez e congela no fim */
+          var pf = footVid.play();
+          if (pf && pf.catch) pf.catch(function () {});
+        }
       });
-    }, { threshold: 0.25 });
-    footIO.observe(footVid);
+    }, { rootMargin: '250% 0px', threshold: 0 });
+    footIO.observe(document.getElementById('fTrack'));
   }
 
   /* ---------- MUNDO ATIVO — contador "/", chrome e paleta ---------- */
@@ -2067,8 +2093,8 @@ footer{
       scrollTrigger: { trigger: '.arc', start: 'top 72%', end: 'bottom 55%', scrub: 0.5 }
     });
 
-    /* MÉTODO — a raiz orgânica se desenha no scroll; cada fase nasce com zoom
-       quando a ponta da raiz chega no seu nó */
+    /* MÉTODO — pin na faixa: a raiz se desenha com o scroll e cada fase entra em
+       FOCO (nasce grande na tela) → assenta no tamanho normal → a próxima cresce */
     var fz = document.querySelector('#metodo .fases');
     if (fz) {
       var fzFases = fz.querySelectorAll('.fase');
@@ -2076,30 +2102,59 @@ footer{
       fzMM.add('(min-width: 1021px)', function () {
         fzFases.forEach(function (f) { f.classList.remove('rv'); });
         var fzTl = gsap.timeline({
-          scrollTrigger: { trigger: fz, start: 'top 80%', end: 'bottom 48%', scrub: 0.5 }
+          scrollTrigger: { trigger: fz, start: 'center 60%', end: '+=140%', scrub: 0.5, pin: true }
         });
-        fzTl.fromTo('#metodo .fz-main',
-          { strokeDasharray: 1, strokeDashoffset: 1 },
-          { strokeDashoffset: 0, ease: 'none', duration: 1.2 }, 0);
-        fz.querySelectorAll('.fz-br').forEach(function (br, i) {
-          var at = ((100 + 200 * i) / 1200) * 1.2;
-          fzTl.fromTo(br,
-            { strokeDasharray: 1, strokeDashoffset: 1 },
-            { strokeDashoffset: 0, duration: 0.12, ease: 'none' }, at);
-          fzTl.fromTo(fzFases[i],
-            { opacity: 0, scale: 0.55, y: 16 },
-            { opacity: 1, scale: 1, y: 0, duration: 0.16, ease: 'none' }, at + 0.02);
+        /* a main desenha em 6 segmentos fromTo explícitos (determinístico, sem captura
+           lazy de estado) — cada segmento alcança o nó na hora em que a fase nasce */
+        var fzMain = fz.querySelector('.fz-main');
+        var fzBrs = fz.querySelectorAll('.fz-br');
+        fzFases.forEach(function (fase, i) {
+          var seg0 = Math.round(1000 * (1 - i / 6));
+          var seg1 = Math.round(1000 * (1 - (i + 1) / 6));
+          var t0 = i * 0.2;
+          fzTl.fromTo(fzMain,
+            { strokeDashoffset: seg0 },
+            { strokeDashoffset: seg1, duration: 0.2, ease: 'none', immediateRender: false }, t0);
+          fzTl.fromTo(fzBrs[i],
+            { strokeDashoffset: 1000 },
+            { strokeDashoffset: 0, duration: 0.1, ease: 'none', immediateRender: false }, t0 + 0.1);
+          /* nasce em destaque… */
+          fzTl.fromTo(fase,
+            { opacity: 0, scale: 0.6, y: 22 },
+            { opacity: 1, scale: 1.35, y: -6, duration: 0.12, ease: 'none' }, t0 + 0.11);
+          /* …e assenta enquanto a próxima cresce */
+          fzTl.to(fase, { scale: 1, y: 0, duration: 0.1, ease: 'none' }, t0 + 0.28);
         });
+        fzTl.to({}, { duration: 0.14 }); /* respiro: a última assenta antes do unpin */
       });
       fzMM.add('(max-width: 1020px)', function () {
         fzFases.forEach(function (f) {
           f.classList.remove('rv');
-          gsap.fromTo(f,
-            { opacity: 0, scale: 0.6, x: -12 },
-            { opacity: 1, scale: 1, x: 0, ease: 'none',
-              scrollTrigger: { trigger: f, start: 'top 90%', end: 'top 64%', scrub: 0.4 } });
+          gsap.timeline({
+            scrollTrigger: { trigger: f, start: 'top 88%', end: 'top 30%', scrub: 0.4 }
+          })
+            .fromTo(f, { opacity: 0, scale: 0.6, x: -12 },
+                       { opacity: 1, scale: 1.18, x: 0, duration: 0.6, ease: 'none' })
+            .to(f, { scale: 1, duration: 0.4, ease: 'none' });
         });
       });
+    }
+
+    /* RODAPÉ — scrub do filme da raiz + a logo RAIZ se materializa sobre o feixe */
+    var fTrack = document.getElementById('fTrack');
+    if (fTrack && footVid) {
+      var bindFoot = function () {
+        var fdur = Math.max(0.01, footVid.duration - 0.05);
+        var fTl = gsap.timeline({
+          scrollTrigger: { trigger: '#fTrack', start: 'top top', end: 'bottom bottom', scrub: 0.5 }
+        });
+        fTl.fromTo(footVid, { currentTime: 0 }, { currentTime: fdur, ease: 'none', duration: 1 }, 0)
+           .fromTo('.f-logo',
+             { opacity: 0, scale: 1.08, y: 16 },
+             { opacity: 1, scale: 1, y: 0, ease: 'none', duration: 0.42 }, 0.55);
+      };
+      if (footVid.readyState >= 1) bindFoot();
+      else footVid.addEventListener('loadedmetadata', bindFoot, { once: true });
     }
 
     /* JORNADA — a raiz se desenha enquanto as fases passam */
