@@ -418,22 +418,24 @@ html.gsap .arc-fill{ transform:scaleY(0) }
 .metodo-logo.missing img{ display:none }
 .metodo-logo.missing .m-fallback{ display:block }
 
-/* as 6 fases como nós numa raiz horizontal (vertical no mobile) */
-.fases-strip{
-  position:relative;
-  margin-top:clamp(64px,9vh,96px);
+/* as 6 fases nascem de uma raiz orgânica que se desenha com o scroll */
+.fases{ margin-top:clamp(64px,9vh,96px) }
+.fz-svg{ display:block; width:100%; height:auto; overflow:visible }
+.fz-svg path{ fill:none; stroke:url(#fzGrad); stroke-linecap:round }
+.fz-svg .fz-main{ stroke-width:2 }
+.fz-svg .fz-br{ stroke-width:1.2; opacity:.75 }
+.fases-grid{
   display:grid; grid-template-columns:repeat(6,1fr); gap:0 18px;
+  margin-top:-4px;
 }
-.fases-strip::before{
-  content:""; position:absolute; left:6px; right:6px; top:5px; height:1px;
-  background:linear-gradient(90deg, var(--mz-green-light), var(--mz-green) 50%, var(--mz-green-deep));
-  opacity:.45;
+.fase{
+  position:relative; padding-top:26px; text-align:center;
+  transform-origin:50% 0;
 }
-.fase{ position:relative; padding-top:28px }
 .fase::before{
-  content:""; position:absolute; top:0; left:0;
+  content:""; position:absolute; top:0; left:50%;
   width:11px; height:11px; border-radius:50%;
-  transform:translateY(-5px);
+  transform:translate(-50%,-5px);
   background:var(--mz-green);
   box-shadow:0 0 12px rgba(153,172,98,.55);
 }
@@ -1022,27 +1024,22 @@ footer{
   margin-top:clamp(54px,7vh,84px); position:relative;
   padding:0 0 34px;
 }
-/* a raiz da marca aterra no rodapé: eco do trilho e das raízes do vídeo, desenhada no reveal */
-.f-roots{ display:block; width:min(620px,86%); margin-inline:auto }
-.f-roots path{
-  fill:none; stroke:url(#footRootGrad); stroke-linecap:round;
-  stroke-width:1.4;
+/* a raiz aterra com o PRÓPRIO filme da marca: trecho em que a raiz cresce */
+.f-stage{
+  position:relative;
+  height:clamp(230px,36vh,380px);
+  overflow:clip;
 }
-.f-roots path.fr-b{ stroke-width:1.1; opacity:.6 }
-.f-roots path.fr-s{ stroke-width:.8; opacity:.4 }
-html.motion .f-roots path{
-  stroke-dasharray:1; stroke-dashoffset:1;
-  transition:stroke-dashoffset 1.6s var(--ease);
+#footVid{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; object-position:50% 32%;
 }
-html.motion .f-roots.on path{ stroke-dashoffset:0 }
-html.motion .f-roots.on path:nth-child(2){ transition-delay:.15s }
-html.motion .f-roots.on path:nth-child(3){ transition-delay:.25s }
-html.motion .f-roots.on path:nth-child(4){ transition-delay:.35s }
-html.motion .f-roots.on path:nth-child(5){ transition-delay:.45s }
-html.motion .f-roots.on path:nth-child(6){ transition-delay:.55s }
-html.motion .f-roots.on path:nth-child(7){ transition-delay:.65s }
-html.motion .f-roots.on path:nth-child(8){ transition-delay:.78s }
-html.motion .f-roots.on path:nth-child(9){ transition-delay:.9s }
+.f-mask{
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    linear-gradient(180deg, var(--mz-black) 0%, transparent 28% 68%, var(--mz-black) 100%),
+    linear-gradient(90deg, var(--mz-black) 0%, transparent 18% 82%, var(--mz-black) 100%);
+}
 .f-line{
   margin-top:26px; text-align:center;
   font-size:.74rem; color:rgba(239,239,229,.38); letter-spacing:.06em;
@@ -1053,13 +1050,15 @@ html.motion .f-roots.on path:nth-child(9){ transition-delay:.9s }
    ============================================================ */
 @media (max-width:1020px){
   .numgrid{ grid-template-columns:repeat(2,1fr) }
-  .fases-strip{ grid-template-columns:1fr; gap:30px 0 }
-  .fases-strip::before{
-    left:5px; right:auto; top:2px; bottom:2px; width:1px; height:auto;
+  .fz-svg{ display:none }
+  .fases-grid{ grid-template-columns:1fr; gap:30px 0; position:relative; margin-top:0 }
+  .fases-grid::before{
+    content:""; position:absolute; left:5px; top:2px; bottom:2px; width:1px;
     background:linear-gradient(180deg, var(--mz-green-light), var(--mz-green) 50%, var(--mz-green-deep));
+    opacity:.5;
   }
-  .fase{ padding:0 0 0 34px }
-  .fase::before{ top:.3em; transform:none }
+  .fase{ padding:0 0 0 34px; text-align:left; transform-origin:0 50% }
+  .fase::before{ top:.3em; left:0; transform:none }
   .forcas{ grid-template-columns:repeat(2,1fr) }
   .equipe .card{ grid-column:span 3 !important }
   .idchecks{ grid-template-columns:repeat(2,1fr) }
@@ -1109,7 +1108,7 @@ html.motion .f-roots.on path:nth-child(9){ transition-delay:.9s }
   .arc-fill{ transform:none !important }
   .jr-svg .taproot{ stroke-dasharray:none !important; stroke-dashoffset:0 !important }
   .jr-node path{ stroke-dashoffset:0 !important }
-  .f-roots path{ stroke-dasharray:none !important; stroke-dashoffset:0 !important }
+  .fz-svg path{ stroke-dasharray:none !important; stroke-dashoffset:0 !important }
   .jr-words span{ opacity:0 }
   .jr-words span:first-child{ opacity:1 }
 }
@@ -1270,13 +1269,31 @@ html.motion .f-roots.on path:nth-child(9){ transition-delay:.9s }
       <span class="m-fallback" aria-hidden="true">RA<span class="sl">I</span>Z</span>
     </div>
 
-    <div class="fases-strip rv-group">
-      <div class="fase rv"><h3><i>Fase 1</i>Terreno</h3><p>Onde plantar: o mercado é lido antes de qualquer produto.</p></div>
-      <div class="fase rv"><h3><i>Fase 2</i>Marca</h3><p>O que construir: produto-herói, oferta e identidade.</p></div>
-      <div class="fase rv"><h3><i>Fase 3</i>Vitrine</h3><p>Onde vender: a loja que transforma marca em compra.</p></div>
-      <div class="fase rv"><h3><i>Fase 4</i>Sinal</h3><p>Atrair e ler a resposta: conteúdo, criativo, primeira tração.</p></div>
-      <div class="fase rv"><h3><i>Fase 5</i>Tração</h3><p>Confirmar o que funciona: a conta fecha — ou pivota com método.</p></div>
-      <div class="fase rv"><h3><i>Fase 6</i>Escala</h3><p>Multiplicar: Q4, Black Friday e autonomia.</p></div>
+    <div class="fases" aria-label="As 6 fases do método">
+      <svg class="fz-svg" viewBox="0 0 1200 118" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="fzGrad" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#C8D890"/>
+            <stop offset=".5" stop-color="#99AC62"/>
+            <stop offset="1" stop-color="#67843C"/>
+          </linearGradient>
+        </defs>
+        <path class="fz-main" pathLength="1" d="M0 34 C 50 22, 96 46, 150 36 S 250 18, 310 34 S 410 50, 470 34 S 560 18, 630 34 S 740 50, 800 32 S 900 18, 970 34 S 1100 46, 1200 30"/>
+        <path class="fz-br" pathLength="1" d="M100 32 C 94 56, 90 76, 82 104"/>
+        <path class="fz-br" pathLength="1" d="M300 30 C 306 56, 310 78, 318 106"/>
+        <path class="fz-br" pathLength="1" d="M500 36 C 494 60, 490 80, 484 104"/>
+        <path class="fz-br" pathLength="1" d="M700 32 C 706 58, 712 78, 720 106"/>
+        <path class="fz-br" pathLength="1" d="M900 30 C 894 56, 890 76, 884 102"/>
+        <path class="fz-br" pathLength="1" d="M1100 36 C 1106 58, 1110 78, 1116 104"/>
+      </svg>
+      <div class="fases-grid">
+        <div class="fase rv"><h3><i>Fase 1</i>Terreno</h3><p>Onde plantar: o mercado é lido antes de qualquer produto.</p></div>
+        <div class="fase rv"><h3><i>Fase 2</i>Marca</h3><p>O que construir: produto-herói, oferta e identidade.</p></div>
+        <div class="fase rv"><h3><i>Fase 3</i>Vitrine</h3><p>Onde vender: a loja que transforma marca em compra.</p></div>
+        <div class="fase rv"><h3><i>Fase 4</i>Sinal</h3><p>Atrair e ler a resposta: conteúdo, criativo, primeira tração.</p></div>
+        <div class="fase rv"><h3><i>Fase 5</i>Tração</h3><p>Confirmar o que funciona: a conta fecha — ou pivota com método.</p></div>
+        <div class="fase rv"><h3><i>Fase 6</i>Escala</h3><p>Multiplicar: Q4, Black Friday e autonomia.</p></div>
+      </div>
     </div>
 
     <div class="andaime rv">
@@ -1799,25 +1816,12 @@ html.motion .f-roots.on path:nth-child(9){ transition-delay:.9s }
     <p class="cta-tag rv">método raiz — 6 fases <span class="sl">/</span> 6 mundos</p>
 
     <footer>
-      <!-- a raiz aterra: eco orgânico do trilho-raiz e das raízes do vídeo do hero -->
-      <svg class="f-roots rv" viewBox="0 0 600 210" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <linearGradient id="footRootGrad" x1="300" y1="0" x2="300" y2="210" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#C8D890"/>
-            <stop offset=".5" stop-color="#99AC62"/>
-            <stop offset="1" stop-color="#67843C"/>
-          </linearGradient>
-        </defs>
-        <path pathLength="1" d="M300 2 C 296 58, 305 116, 299 204"/>
-        <path pathLength="1" class="fr-b" d="M299 36 C 262 68, 230 88, 199 136"/>
-        <path pathLength="1" class="fr-b" d="M300 54 C 340 86, 376 104, 410 148"/>
-        <path pathLength="1" class="fr-b" d="M298 88 C 250 124, 206 142, 163 178"/>
-        <path pathLength="1" class="fr-b" d="M301 102 C 350 134, 396 154, 441 188"/>
-        <path pathLength="1" class="fr-b" d="M299 132 C 272 160, 250 174, 226 200"/>
-        <path pathLength="1" class="fr-b" d="M300 144 C 328 170, 354 186, 381 206"/>
-        <path pathLength="1" class="fr-s" d="M199 136 C 190 150, 184 162, 180 176"/>
-        <path pathLength="1" class="fr-s" d="M410 148 C 419 160, 425 170, 429 184"/>
-      </svg>
+      <!-- a raiz aterra com o próprio filme da marca (trecho em que a raiz cresce);
+           toca uma vez quando o rodapé entra e congela no último frame -->
+      <div class="f-stage" aria-hidden="true">
+        <video id="footVid" muted playsinline preload="none" poster="assets/video/footer-roots-end.webp"></video>
+        <div class="f-mask"></div>
+      </div>
       <p class="f-line">Marca Zero · Método RAIZ — mentoria individual conduzida por Everton Stedile · 2026</p>
     </footer>
   </div>
@@ -1867,6 +1871,22 @@ html.motion .f-roots.on path:nth-child(9){ transition-delay:.9s }
       if (el && lenis) { e.preventDefault(); lenis.scrollTo(el, { offset: 0 }); }
     });
   });
+
+  /* ---------- RODAPÉ — a raiz cresce uma vez quando o rodapé entra em cena ---------- */
+  var footVid = document.getElementById('footVid');
+  if (footVid && motion) {
+    var footIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        footIO.unobserve(footVid);
+        var canF = footVid.canPlayType('video/mp4; codecs="avc1.42E01E"');
+        footVid.src = 'assets/video/footer-roots' + (canF ? '.mp4' : '.webm');
+        var pf = footVid.play(); /* sem loop: termina e congela no último frame */
+        if (pf && pf.catch) pf.catch(function () {});
+      });
+    }, { threshold: 0.25 });
+    footIO.observe(footVid);
+  }
 
   /* ---------- MUNDO ATIVO — contador "/", chrome e paleta ---------- */
   var worlds  = Array.prototype.slice.call(document.querySelectorAll('.world'));
@@ -2046,6 +2066,41 @@ html.motion .f-roots.on path:nth-child(9){ transition-delay:.9s }
       scaleY: 1, ease: 'none',
       scrollTrigger: { trigger: '.arc', start: 'top 72%', end: 'bottom 55%', scrub: 0.5 }
     });
+
+    /* MÉTODO — a raiz orgânica se desenha no scroll; cada fase nasce com zoom
+       quando a ponta da raiz chega no seu nó */
+    var fz = document.querySelector('#metodo .fases');
+    if (fz) {
+      var fzFases = fz.querySelectorAll('.fase');
+      var fzMM = gsap.matchMedia();
+      fzMM.add('(min-width: 1021px)', function () {
+        fzFases.forEach(function (f) { f.classList.remove('rv'); });
+        var fzTl = gsap.timeline({
+          scrollTrigger: { trigger: fz, start: 'top 80%', end: 'bottom 48%', scrub: 0.5 }
+        });
+        fzTl.fromTo('#metodo .fz-main',
+          { strokeDasharray: 1, strokeDashoffset: 1 },
+          { strokeDashoffset: 0, ease: 'none', duration: 1.2 }, 0);
+        fz.querySelectorAll('.fz-br').forEach(function (br, i) {
+          var at = ((100 + 200 * i) / 1200) * 1.2;
+          fzTl.fromTo(br,
+            { strokeDasharray: 1, strokeDashoffset: 1 },
+            { strokeDashoffset: 0, duration: 0.12, ease: 'none' }, at);
+          fzTl.fromTo(fzFases[i],
+            { opacity: 0, scale: 0.55, y: 16 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.16, ease: 'none' }, at + 0.02);
+        });
+      });
+      fzMM.add('(max-width: 1020px)', function () {
+        fzFases.forEach(function (f) {
+          f.classList.remove('rv');
+          gsap.fromTo(f,
+            { opacity: 0, scale: 0.6, x: -12 },
+            { opacity: 1, scale: 1, x: 0, ease: 'none',
+              scrollTrigger: { trigger: f, start: 'top 90%', end: 'top 64%', scrub: 0.4 } });
+        });
+      });
+    }
 
     /* JORNADA — a raiz se desenha enquanto as fases passam */
     gsap.to('.jr-svg .taproot', {
