@@ -23,4 +23,4 @@ Fundo `#04090A` · creme `#EFEFE5` · verde-raiz `#99AC62` · chartreuse `#C8D89
 
 ## Deploy
 
-GitHub Pages servindo a raiz do repositório na branch `main`.
+GitHub Actions (`.github/workflows/deploy-pages.yml`): cada push na `main` publica o site no GitHub Pages automaticamente — incluindo a ativação do Pages na primeira execução.
