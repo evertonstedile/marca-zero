@@ -1,6 +1,8 @@
 # Estratégia/metodologia — contexto local apenas, NUNCA publicar
 marca-zero-documento-mae.md
 marca-zero-build-prompt.md
+CHECKPOINT.md
+DIRETRIZES-EVERTON.md
 
 # Infra
 node_modules/
