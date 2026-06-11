@@ -380,7 +380,7 @@ html.gsap .hero-stage{ position:sticky; top:0; height:100vh; overflow:hidden }
   position:relative;
   width:clamp(300px,56vw,800px);
   margin:40px auto 0;
-  /* sem mix-blend: o hero usa o derivado com ALPHA REAL (logo-marca-zero-hero.png);
+  /* sem mix-blend: a logo tem ALPHA REAL (webp transparente);
      blend sobre <video> é instável entre browsers/camadas de GPU */
   will-change:transform,opacity;
 }
@@ -550,9 +550,9 @@ html:not(.gsap) .metodo-focus{ display:none }
   html.gsap .metodo-pin{ height:80vh; display:flex; flex-direction:column }
   html.gsap .metodo-pin .metodo-back{
     flex:1; display:flex; flex-direction:column;
-    justify-content:space-between; padding-block:2vh;
+    justify-content:flex-start; padding-block:2vh;
   }
-  html.gsap .metodo-pin .fases{ margin-top:0 }
+  html.gsap .metodo-pin .fases{ margin-block:auto } /* raiz centralizada: sem buraco */
 }
 .metodo-logo .mglow{
   position:absolute; inset:-42% -24%; z-index:-1; pointer-events:none;
@@ -1316,7 +1316,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         <h1 class="hero-brand" aria-label="Marca Zero">
           <span class="hero-glow" aria-hidden="true"></span>
           <!-- derivado com alpha real do master assets/logo-marca-zero.png -->
-          <img class="hero-logo" src="assets/logo-marca-zero-hero.png" alt="Marca Zero" decoding="async"
+          <img class="hero-logo" src="assets/logo-marca-zero.webp" alt="Marca Zero" decoding="async"
                onerror="this.closest('.hero-brand').classList.add('missing')">
           <span class="hero-fallback" aria-hidden="true">MARCA<span class="sl">/</span><span class="lz">ZERO</span></span>
         </h1>
@@ -1434,7 +1434,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       <div class="metodo-back">
         <div class="metodo-logo" aria-label="Método RAIZ — 6 fases, 6 mundos">
           <span class="mglow" aria-hidden="true"></span>
-          <img src="assets/logo-metodo-raiz-hero.webp" alt="Método RAIZ" loading="lazy" decoding="async"
+          <img src="assets/logo-metodo-raiz.webp" alt="Método RAIZ" loading="lazy" decoding="async"
                onerror="this.closest('.metodo-logo').classList.add('missing')">
           <span class="m-fallback" aria-hidden="true">RA<span class="sl">I</span>Z</span>
         </div>
@@ -1992,7 +1992,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
 
     <div class="cta-sign rv" aria-label="Marca Zero">
       <span class="cta-glow" aria-hidden="true"></span>
-      <img src="assets/logo-marca-zero-hero.png" alt="Marca Zero" loading="lazy" decoding="async"
+      <img src="assets/logo-marca-zero.webp" alt="Marca Zero" loading="lazy" decoding="async"
            onerror="this.closest('.cta-sign').classList.add('missing')">
       <span class="cta-sign-fallback" aria-hidden="true">MARCA<span class="sl">/</span><span class="lz">ZERO</span></span>
     </div>
@@ -2006,7 +2006,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
           <video id="footVid" muted playsinline preload="none" poster="assets/video/footer-roots-end.webp" aria-hidden="true"></video>
           <div class="f-mask" aria-hidden="true"></div>
           <div class="f-logo" aria-label="Método RAIZ — 6 fases, 6 mundos">
-            <img src="assets/logo-metodo-raiz-hero.webp" alt="Método RAIZ" decoding="async">
+            <img src="assets/logo-metodo-raiz.webp" alt="Método RAIZ" decoding="async">
           </div>
           <p class="f-line">Marca Zero · Método RAIZ — mentoria individual conduzida por Everton Stedile · 2026</p>
         </div>
@@ -2451,6 +2451,8 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
             { strokeDashoffset: 0, duration: D_BR, ease: 'none', immediateRender: false }, t + D_SEG - D_BR);
           t += D_SEG;
 
+          /* o fundo só desfoca enquanto o número está em cena */
+          fzTl.to(mBack, { filter: 'blur(6px)', opacity: 0.38, duration: 0.06, ease: 'none' }, t);
           fzTl.fromTo(mfItems[i],
             { opacity: 0, scale: 0.7, x: 0, y: 26 },
             { opacity: 1, scale: 1, x: 0, y: 0, duration: D_IN, ease: 'none' }, t);
@@ -2464,13 +2466,11 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
           fzTl.fromTo(fase,
             { opacity: 0, scale: 0.7, y: 10 },
             { opacity: 1, scale: 1, y: 0, duration: 0.06, ease: 'none' }, t + D_RET - 0.05);
+          /* número de volta na raiz: a raiz volta 100% nítida antes de seguir */
+          fzTl.to(mBack, { filter: 'blur(0px)', opacity: 1, duration: D_GAP, ease: 'none' }, t + D_RET);
           t += D_RET + D_GAP;
         });
 
-        /* fundo desfocado do primeiro número até o último voltar */
-        fzTl.fromTo(mBack, { filter: 'blur(0px)', opacity: 1 },
-          { filter: 'blur(6px)', opacity: 0.38, duration: 0.1, ease: 'none', immediateRender: false }, D_SEG);
-        fzTl.to(mBack, { filter: 'blur(0px)', opacity: 1, duration: 0.12, ease: 'none' }, t - D_GAP);
         fzTl.to({}, { duration: 0.1 }); /* respiro antes do unpin */
       });
       fzMM.add('(max-width: 1020px)', function () {
