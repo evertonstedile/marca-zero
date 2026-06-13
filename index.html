@@ -2523,7 +2523,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         scrollTrigger: {
           trigger: stage, start: 'top top',
           end: function () { return '+=' + dist(); },
-          pin: true, scrub: 0.5, anticipatePin: 1, invalidateOnRefresh: true
+          pin: true, scrub: 0.5, anticipatePin: 1, invalidateOnRefresh: true, refreshPriority: 10
         }
       });
       tl.to(track, { x: function () { return -dist(); }, ease: 'none' }, 0);
@@ -2535,6 +2535,24 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         scrollTrigger: { trigger: '.arc', start: 'top 72%', end: 'bottom 55%', scrub: 0.5 }
       });
     });
+
+    /* SOURCING — A2: Nacional (esquerda) e Internacional (direita) deslizam e se
+       ENCONTRAM na tabela de trade-offs (scrub); Dimensão sobe firme no centro.
+       O conflito da decisão, visualizado. Mobile herda offset menor (auto 8vw). */
+    var toTable = document.querySelector('.tradeoff');
+    if (toTable) {
+      toTable.classList.remove('rv');
+      var toDim = gsap.utils.toArray('.tradeoff .to-row > div:nth-child(1)');
+      var toNac = gsap.utils.toArray('.tradeoff .to-row > div:nth-child(2)');
+      var toInt = gsap.utils.toArray('.tradeoff .to-row > div:nth-child(3)');
+      var toOff = function () { return Math.min(150, window.innerWidth * 0.085); };
+      var toTl = gsap.timeline({
+        scrollTrigger: { trigger: toTable, start: 'top 82%', end: 'top 40%', scrub: 0.6, invalidateOnRefresh: true }
+      });
+      toTl.fromTo(toDim, { opacity: 0, y: 18 }, { opacity: 1, y: 0, ease: 'none' }, 0)
+          .fromTo(toNac, { x: function () { return -toOff(); }, opacity: 0 }, { x: 0, opacity: 1, ease: 'none' }, 0)
+          .fromTo(toInt, { x: function () { return  toOff(); }, opacity: 0 }, { x: 0, opacity: 1, ease: 'none' }, 0);
+    }
 
     /* MÉTODO — palco pinado (logo no topo o tempo todo): a raiz se desenha com o
        scroll; a cada nó, o NÚMERO da fase aparece GRANDE e centralizado enquanto
@@ -2562,7 +2580,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         var fzTl = gsap.timeline({
           scrollTrigger: {
             trigger: '#metodoPin', start: 'top 10%', end: '+=520%',
-            scrub: 0.6, pin: true, invalidateOnRefresh: true
+            scrub: 0.6, pin: true, invalidateOnRefresh: true, refreshPriority: 9
           }
         });
 
