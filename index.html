@@ -883,6 +883,18 @@ html.motion .caret{ animation:caret 1.1s steps(1) infinite }
 }
 .flow-step:last-child::after{ content:none }
 
+/* A5 — funil acende passo a passo conforme o scroll (sob gsap; sem motor = tudo visível) */
+html.gsap #checkout .fs-box{ opacity:.4;
+  transition:opacity .5s var(--ease), border-color .5s var(--ease), background .5s var(--ease), box-shadow .5s var(--ease) }
+html.gsap #checkout .fs-box h4{ transition:color .5s var(--ease) }
+html.gsap #checkout .flow-step::after{ transition:opacity .5s var(--ease) }
+html.gsap #checkout .flow-step:not(.active)::after{ opacity:.18 }
+html.gsap #checkout .flow-step.active .fs-box{
+  opacity:1; border-color:color-mix(in srgb, var(--w-accent) 55%, transparent);
+  background:color-mix(in srgb, var(--w-accent) 9%, var(--card));
+  box-shadow:0 0 26px -8px color-mix(in srgb, var(--w-accent) 60%, transparent) }
+html.gsap #checkout .flow-step.active .fs-box h4{ color:var(--w-accent) }
+
 .decisao{ margin-top:56px; display:grid; grid-template-columns:1fr 1fr; gap:16px }
 .decisao .card h3{
   font-family:var(--font-display); font-weight:400; font-size:1rem;
@@ -2552,6 +2564,21 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       toTl.fromTo(toDim, { opacity: 0, y: 18 }, { opacity: 1, y: 0, ease: 'none' }, 0)
           .fromTo(toNac, { x: function () { return -toOff(); }, opacity: 0 }, { x: 0, opacity: 1, ease: 'none' }, 0)
           .fromTo(toInt, { x: function () { return  toOff(); }, opacity: 0 }, { x: 0, opacity: 1, ease: 'none' }, 0);
+    }
+
+    /* CHECKOUT — A5: os 6 passos do funil acendem um a um conforme o scroll.
+       O usuário percorre o funil — a seção ensina o conteúdo. */
+    var coSteps = gsap.utils.toArray('#checkout .flow-step');
+    if (coSteps.length) {
+      ScrollTrigger.create({
+        trigger: '#checkout .flow', start: 'top 80%', end: 'top 34%',
+        onUpdate: function (self) {
+          var lit = Math.round(self.progress * coSteps.length);
+          coSteps.forEach(function (s, i) { s.classList.toggle('active', i < lit); });
+        },
+        onLeave:     function () { coSteps.forEach(function (s) { s.classList.add('active'); }); },
+        onLeaveBack: function () { coSteps.forEach(function (s) { s.classList.remove('active'); }); }
+      });
     }
 
     /* MÉTODO — palco pinado (logo no topo o tempo todo): a raiz se desenha com o
