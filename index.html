@@ -128,7 +128,7 @@ em{ font-style:normal }
   background:none; border:0; padding:6px 2px;
   color:inherit; cursor:pointer; pointer-events:auto;
 }
-.ch-counter .sl{ color:inherit; opacity:.65 }
+.ch-counter .sl{ color:var(--chrome-accent); opacity:.9 }
 
 /* ===== ÍNDICE OVERLAY — 13 mundos agrupados pelas 6 fases ===== */
 html.nav-open{ overflow:clip }
@@ -206,6 +206,7 @@ html.nav-open{ overflow:clip }
 #rail::before{ /* leito da raiz */
   content:""; position:absolute; inset:0;
   background:rgba(239,239,229,.07);
+  transition:background .8s var(--ease);
 }
 #rail-fill{
   position:absolute; inset:0;
@@ -232,7 +233,7 @@ html.gsap #rail-fill{ transform:scaleY(0) }
 .rail-node.lit::before{
   background:var(--mz-green);
   border-color:var(--mz-green-light);
-  box-shadow:0 0 10px rgba(153,172,98,.55);
+  box-shadow:0 0 11px color-mix(in srgb, var(--chrome-accent) 70%, transparent);
 }
 .rail-node:focus-visible{ outline:none }
 .rail-node:focus-visible::before{ box-shadow:0 0 0 3px rgba(200,216,144,.4) }
@@ -301,6 +302,17 @@ body[data-world="google"] #rail::before{ background:rgba(4,9,10,.14) }
   display:none;
 }
 html.gsap .world-slash{ display:block }
+
+/* A8 — máscara de revelação por linha dos títulos; o paint (gradiente OU fill
+   sólido + shadow) é copiado por JS para cada linha, então viaja COM a linha */
+html.gsap .w-title .mz-mask{ display:block; overflow:clip; padding-bottom:.16em; margin-bottom:-.16em }
+html.gsap .w-title .mz-line{ display:block; will-change:transform }
+
+/* A9 — acento da cena desliza no chrome (contador "/" e brilho do nó aceso);
+   a raiz (rail-fill) segue verde por lei de marca. @property torna a cor animável */
+@property --chrome-accent{ syntax:'<color>'; inherits:true; initial-value:#99AC62 }
+:root{ --chrome-accent:#99AC62 }
+html.motion body{ transition:--chrome-accent .8s var(--ease) }
 
 /* reveals — vanilla CSS + IntersectionObserver (canhão só no crítico) */
 html.motion .rv{ opacity:0; transform:translateY(32px); transition:opacity 1s var(--ease), transform 1s var(--ease) }
@@ -2093,6 +2105,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
      ============================================================ -->
 <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
 <script>
 (function () {
@@ -2180,11 +2193,17 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
   var chIdx   = document.getElementById('chIdx');
   var chName  = document.getElementById('chName');
 
+  /* A9 — acento da cena por mundo (chrome desliza entre mundos da mesma fase) */
+  var WORLD_ACCENT = {
+    ia:'#D97757', fornecedor:'#E0A43C', identidade:'#8B5CF6', shopify:'#95BF47',
+    checkout:'#32BCAD', google:'#4285F4', tiktok:'#25F4EE', meta:'#0866FF'
+  };
   var worldIO = new IntersectionObserver(function (entries) {
     entries.forEach(function (en) {
       if (!en.isIntersecting) return;
       var w = en.target;
       document.body.dataset.world = w.dataset.world;
+      document.body.style.setProperty('--chrome-accent', WORLD_ACCENT[w.dataset.world] || '#99AC62');
       if (chIdx)  chIdx.textContent  = w.dataset.index;
       if (chName) chName.textContent = w.dataset.name;
       var i = worlds.indexOf(w);
@@ -2381,6 +2400,52 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
   /* ---------- GSAP — o pesado e crítico ---------- */
   if (motion && hasGSAP) {
     gsap.registerPlugin(ScrollTrigger);
+    if (window.SplitText) gsap.registerPlugin(SplitText);
+
+    /* mzEase — sua cubic-bezier(.2,.7,.2,1) como função, sem plugin de ease novo */
+    var mzEase = (function () {
+      function bez(p1x, p1y, p2x, p2y) {
+        var cx = 3*p1x, bx = 3*(p2x-p1x)-cx, ax = 1-cx-bx;
+        var cy = 3*p1y, by = 3*(p2y-p1y)-cy, ay = 1-cy-by;
+        function fx(t){ return ((ax*t+bx)*t+cx)*t; }
+        function dfx(t){ return (3*ax*t+2*bx)*t+cx; }
+        return function (x) {
+          var t = x, i, d, dd;
+          for (i=0;i<8;i++){ d=fx(t)-x; if(Math.abs(d)<1e-5) break; dd=dfx(t); if(Math.abs(dd)<1e-6) break; t-=d/dd; }
+          return ((ay*t+by)*t+cy)*t;
+        };
+      }
+      return bez(0.2, 0.7, 0.2, 1.0);
+    })();
+
+    /* A8 — TÍTULOS: revelação por linha sob máscara, 1ª entrada apenas.
+       Copia o paint computado (gradiente OU fill sólido + shadow do TikTok) para
+       cada linha → a cor viaja COM a linha, sem depender do clip:text do pai. */
+    if (window.SplitText) {
+      document.querySelectorAll('.w-title').forEach(function (title) {
+        var cs = getComputedStyle(title);
+        var split = new SplitText(title, { type: 'lines', linesClass: 'mz-line' });
+        split.lines.forEach(function (ln) {
+          ln.style.backgroundImage      = cs.backgroundImage;
+          ln.style.webkitBackgroundClip = cs.webkitBackgroundClip;
+          ln.style.backgroundClip       = cs.backgroundClip;
+          ln.style.webkitTextFillColor  = cs.webkitTextFillColor;
+          ln.style.color                = cs.color;
+          ln.style.textShadow           = cs.textShadow;
+          var mask = document.createElement('span');
+          mask.className = 'mz-mask';
+          ln.parentNode.insertBefore(mask, ln);
+          mask.appendChild(ln);
+        });
+        gsap.set(split.lines, { yPercent: 118 });
+        ScrollTrigger.create({
+          trigger: title, start: 'top 84%', once: true,
+          onEnter: function () {
+            gsap.to(split.lines, { yPercent: 0, duration: 0.9, stagger: 0.12, ease: mzEase });
+          }
+        });
+      });
+    }
 
     /* ABERTURA — video-scroll real: o scroll toca o vídeo (keyframes densos -g 5);
        a logo fica composta por cima, visível desde o primeiro frame */
@@ -2525,8 +2590,12 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       scrollTrigger: { trigger: '.jr-phases', start: 'top 65%', end: 'bottom 60%', scrub: 0.5 }
     });
 
-    /* FAÍSCA "/" — varre a tela na troca de mundo */
+    /* FAÍSCA "/" — A9: marca SOMENTE a entrada de cada uma das 6 fases RAIZ
+       (Terreno→Mercado, Marca→Identidade, Vitrine→Shopify, Sinal→TikTok,
+       Tração→Meta, Escala→Jornada). Mundos da mesma fase: só crossfade de paleta. */
+    var PHASE_BIRTH = { mercado:1, identidade:1, shopify:1, tiktok:1, meta:1, jornada:1 };
     document.querySelectorAll('.world-slash').forEach(function (sl) {
+      if (!PHASE_BIRTH[sl.parentElement.id]) { sl.remove(); return; }
       gsap.fromTo(sl,
         { x: '-12vw', opacity: 0 },
         {
