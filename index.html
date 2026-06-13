@@ -490,6 +490,30 @@ html.gsap .arc-fill{ transform:scaleY(0) }
 }
 .arc-item p{ margin-top:10px; color:rgba(239,239,229,.74); font-size:.99rem; max-width:58ch }
 
+/* A1 — desktop: a linha do tempo vira faixa HORIZONTAL pinada (blocos entram da
+   direita via scrub). Mobile/tablet mantém a timeline vertical acima. */
+@media (min-width:1021px){
+  html.gsap .mkt-stage{ min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; gap:clamp(30px,6vh,72px) }
+  html.gsap .arc-pin{ overflow:clip }
+  html.gsap .arc-pin .arc{
+    width:max-content; max-width:none; padding:0 14vw 0 0;
+    display:flex; gap:clamp(56px,6vw,120px); will-change:transform;
+  }
+  html.gsap .arc-pin .arc::before{ left:0; right:0; top:8px; bottom:auto; width:auto; height:1px }
+  html.gsap .arc-pin .arc-fill{
+    left:0; top:8px; bottom:auto; width:100%; height:1px;
+    transform:scaleX(0); transform-origin:left center;
+    background:linear-gradient(90deg, var(--mz-green-light), var(--mz-green-deep));
+  }
+  html.gsap .arc-pin .arc-item{
+    flex:0 0 clamp(360px,40vw,520px); padding:46px 0 0;
+    opacity:1; transform:none;
+  }
+  html.gsap .arc-pin .arc-item::before{ left:0; top:8px; transform:translate(-50%,-50%) }
+  html.gsap .arc-pin .arc-item p{ max-width:none }
+}
+
 .numgrid{
   margin-top:clamp(60px,9vh,100px);
   display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
@@ -1366,12 +1390,14 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
 <section class="world" id="mercado" data-world="mercado" data-index="02" data-name="Mercado">
   <div class="world-slash" aria-hidden="true"></div>
   <div class="wrap">
+    <div class="mkt-stage">
     <header class="w-head rv">
       <p class="w-eyebrow"><span class="sl">/</span> Mundo 02 · Terreno — Mercado</p>
       <h2 class="w-title">O jogo real<br>de 2026</h2>
       <p class="w-lede">Antes de plantar, ler o terreno. Cinco anos que mudaram as regras do e-commerce brasileiro — e seis forças que hoje decidem quem sobrevive.</p>
     </header>
 
+    <div class="arc-pin">
     <div class="arc">
       <div class="arc-fill" aria-hidden="true"></div>
       <div class="arc-item rv">
@@ -1394,6 +1420,8 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         <p class="arc-year">2026 — hoje</p>
         <p><strong>O agora.</strong> Imposto federal até US$50 zerado de novo (12/05) — mas o ICMS estadual permanece e a reforma tributária segue em transição. A Meta confirma alta de ~12,5% no custo de anúncio no Brasil. O GMV do TikTok Shop cresce ~102x em um ano.</p>
       </div>
+    </div>
+    </div>
     </div>
 
     <div class="numgrid rv-group">
@@ -2481,10 +2509,31 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.4 }
     });
 
-    /* MERCADO — linha do tempo que se preenche */
-    gsap.to('.arc-fill', {
-      scaleY: 1, ease: 'none',
-      scrollTrigger: { trigger: '.arc', start: 'top 72%', end: 'bottom 55%', scrub: 0.5 }
+    /* MERCADO — A1: desktop = faixa horizontal pinada (blocos de ano entram da
+       direita conforme o scroll); mobile/tablet = linha do tempo vertical. */
+    var arcMM = gsap.matchMedia();
+    arcMM.add('(min-width: 1021px)', function () {
+      var stage = document.querySelector('.mkt-stage');
+      var track = stage && stage.querySelector('.arc');
+      var fill  = stage && stage.querySelector('.arc-fill');
+      if (!stage || !track) return;
+      var dist = function () { return Math.max(0, track.scrollWidth - window.innerWidth + window.innerWidth * 0.14); };
+      gsap.set(track, { x: 0 });
+      var tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: stage, start: 'top top',
+          end: function () { return '+=' + dist(); },
+          pin: true, scrub: 0.5, anticipatePin: 1, invalidateOnRefresh: true
+        }
+      });
+      tl.to(track, { x: function () { return -dist(); }, ease: 'none' }, 0);
+      if (fill) tl.fromTo(fill, { scaleX: 0 }, { scaleX: 1, ease: 'none' }, 0);
+    });
+    arcMM.add('(max-width: 1020px)', function () {
+      gsap.fromTo('.arc-fill', { scaleY: 0 }, {
+        scaleY: 1, ease: 'none',
+        scrollTrigger: { trigger: '.arc', start: 'top 72%', end: 'bottom 55%', scrub: 0.5 }
+      });
     });
 
     /* MÉTODO — palco pinado (logo no topo o tempo todo): a raiz se desenha com o
