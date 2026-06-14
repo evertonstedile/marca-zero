@@ -380,9 +380,11 @@ html:not(.motion) .pt-spark{ animation:none }
 .intro-stage{ position:relative; z-index:2; text-align:center; padding:24px }
 .intro-logo{ width:clamp(240px,36vw,500px); display:block; margin:0 auto;
   filter:drop-shadow(0 2px 22px rgba(4,9,10,.72)) drop-shadow(0 0 56px rgba(4,9,10,.5)) }
-.intro-title{ margin-top:32px; font-family:'Sora',sans-serif; font-weight:300;
-  text-transform:uppercase; letter-spacing:.3em; font-size:clamp(.78rem,1.5vw,.98rem);
-  color:rgba(239,239,229,.82); display:flex; gap:.7em; justify-content:center; flex-wrap:wrap }
+.intro-title{ margin-top:30px; font-family:'Sora',sans-serif; font-weight:300;
+  text-transform:uppercase; letter-spacing:.32em; font-size:clamp(.86rem,1.7vw,1.08rem);
+  color:var(--mz-cream); text-shadow:0 2px 18px rgba(4,9,10,.92), 0 0 40px rgba(4,9,10,.6);
+  display:flex; gap:.7em; justify-content:center; flex-wrap:wrap }
+.intro-title span:last-child{ color:var(--mz-green-light) }
 html:not(.motion) #intro{ display:none !important }
 
 /* reveals — vanilla CSS + IntersectionObserver (canhão só no crítico) */
@@ -2382,10 +2384,10 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       var tl = window.gsap.timeline();
       tl.set('.intro-logo', { opacity: 0, scale: 1.05, filter: 'blur(7px)' })
         .set('.intro-title span', { opacity: 0, y: 14 })
-        .to('.intro-logo', { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 1.4, ease: introEase }, 1.1)
-        .to('.intro-title span', { opacity: 1, y: 0, duration: 0.7, stagger: 0.22, ease: introEase }, 2.9)
-        .to('.intro-title', { opacity: 0, duration: 0.6, ease: introEase }, 5.0)
-        .add(finish, 5.5);
+        .to('.intro-logo', { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 1.2, ease: introEase }, 1.0)
+        .to('.intro-title span', { opacity: 1, y: 0, duration: 0.6, stagger: 0.2, ease: introEase }, 2.5)
+        .to('.intro-title', { opacity: 0, duration: 0.55, ease: introEase }, 4.4)
+        .add(finish, 5.0);
       setTimeout(function () { ['pointerdown','keydown','wheel','touchstart'].forEach(function (ev) { window.addEventListener(ev, skip, { passive: true }); }); }, 800);
       setTimeout(finish, 8000);   // segurança: nunca trava no preto
       return true;
