@@ -366,6 +366,25 @@ html.motion .pt-spark{ animation:ptbreath 3.6s var(--ease) infinite }
 html:not(.motion) #portal{ transition:none }
 html:not(.motion) .pt-spark{ animation:none }
 
+/* ===== INTRO CINEMATOGRÁFICA (pós-portal) ===== */
+#intro{ position:fixed; inset:0; z-index:150; background:#04090A; display:none;
+  align-items:center; justify-content:center; overflow:hidden; opacity:1;
+  transition:opacity .85s var(--ease) }
+#intro.intro-on{ display:flex }
+#intro.intro-out{ opacity:0; pointer-events:none }
+#introVid{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 42% }
+.intro-scrim{ position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse 72% 66% at 50% 46%, transparent 28%, rgba(4,9,10,.5) 72%, rgba(4,9,10,.84) 100%) }
+#intro::after{ content:""; position:absolute; inset:0; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='240'%20height='240'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='240'%20height='240'%20filter='url(%23n)'/%3E%3C/svg%3E") }
+.intro-stage{ position:relative; z-index:2; text-align:center; padding:24px }
+.intro-logo{ width:clamp(240px,36vw,500px); display:block; margin:0 auto;
+  filter:drop-shadow(0 2px 22px rgba(4,9,10,.72)) drop-shadow(0 0 56px rgba(4,9,10,.5)) }
+.intro-title{ margin-top:32px; font-family:'Sora',sans-serif; font-weight:300;
+  text-transform:uppercase; letter-spacing:.3em; font-size:clamp(.78rem,1.5vw,.98rem);
+  color:rgba(239,239,229,.82); display:flex; gap:.7em; justify-content:center; flex-wrap:wrap }
+html:not(.motion) #intro{ display:none !important }
+
 /* reveals — vanilla CSS + IntersectionObserver (canhão só no crítico) */
 html.motion .rv{ opacity:0; transform:translateY(32px); transition:opacity 1s var(--ease), transform 1s var(--ease) }
 html.motion .rv.on{ opacity:1; transform:none }
@@ -1438,6 +1457,17 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
   </div>
 </div>
 
+<!-- INTRO CINEMATOGRÁFICA — pós-portal: o filme da marca acende, a logo se compõe
+     sobre o feixe e dissolve no hero (a logo permanece = corte invisível) -->
+<div id="intro" aria-hidden="true">
+  <video id="introVid" muted playsinline tabindex="-1"></video>
+  <div class="intro-scrim" aria-hidden="true"></div>
+  <div class="intro-stage">
+    <img class="intro-logo" src="assets/logo-marca-zero.webp" alt="" decoding="async">
+    <p class="intro-title"><span>Seis meses.</span><span>Uma raiz.</span></p>
+  </div>
+</div>
+
 <!-- CHROME FIXO -->
 <header id="chrome">
   <a class="ch-mark" href="#abertura">MARCA<span class="sl">/</span>ZERO</a>
@@ -2169,8 +2199,9 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       <span class="cta-sign-fallback" aria-hidden="true">MARCA<span class="sl">/</span><span class="lz">ZERO</span></span>
     </div>
     <p class="cta-tag rv">método raiz — 6 fases <span class="sl">/</span> 6 mundos</p>
+  </div>
 
-    <footer>
+  <footer>
       <!-- fechamento video-scroll: rolar o trecho final faz a raiz do filme crescer
            em tela cheia; a logo MÉTODO RAIZ se materializa sincronizada sobre o feixe -->
       <div class="f-track" id="fTrack">
@@ -2184,7 +2215,6 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         </div>
       </div>
     </footer>
-  </div>
 </section>
 
 </main>
@@ -2325,12 +2355,49 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
 
     /* --- portal --- */
     function warmHero() { var v = document.getElementById('heroVid'); if (v && v.currentSrc) { try { v.load(); } catch (e) {} } }
+
+    /* intro cinematográfica: o filme da marca acende, a logo se compõe sobre o
+       feixe e a cena dissolve no hero (a logo permanece = corte invisível). */
+    var introEase = (function () {
+      function bez(p1x,p1y,p2x,p2y){ var cx=3*p1x,bx=3*(p2x-p1x)-cx,ax=1-cx-bx,cy=3*p1y,by=3*(p2y-p1y)-cy,ay=1-cy-by;
+        function fx(t){return ((ax*t+bx)*t+cx)*t;} function dfx(t){return (3*ax*t+2*bx)*t+cx;}
+        return function(x){ var t=x,i,d,dd; for(i=0;i<8;i++){d=fx(t)-x; if(Math.abs(d)<1e-5)break; dd=dfx(t); if(Math.abs(dd)<1e-6)break; t-=d/dd;} return ((ay*t+by)*t+cy)*t; }; }
+      return bez(0.2,0.7,0.2,1.0);
+    })();
+    function startIntro() {
+      var intro = document.getElementById('intro'), iv = document.getElementById('introVid');
+      if (!intro || !window.gsap) return false;
+      var heroV = document.getElementById('heroVid');
+      if (iv && heroV && heroV.currentSrc) iv.src = heroV.currentSrc;   // reusa o mesmo arquivo (cache)
+      intro.classList.add('intro-on');
+      var ended = false;
+      function cleanup() { ['pointerdown','keydown','wheel','touchstart'].forEach(function (ev) { window.removeEventListener(ev, skip); }); }
+      function finish() {
+        if (ended) return; ended = true; cleanup();
+        intro.classList.add('intro-out');
+        setTimeout(function () { intro.style.display = 'none'; try { iv.pause(); iv.removeAttribute('src'); iv.load(); } catch (e) {} }, 880);
+      }
+      function skip() { try { tl.progress(1); } catch (e) {} finish(); }
+      try { iv.currentTime = 0; var pr = iv.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {}
+      var tl = window.gsap.timeline();
+      tl.set('.intro-logo', { opacity: 0, scale: 1.05, filter: 'blur(7px)' })
+        .set('.intro-title span', { opacity: 0, y: 14 })
+        .to('.intro-logo', { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 1.4, ease: introEase }, 1.1)
+        .to('.intro-title span', { opacity: 1, y: 0, duration: 0.7, stagger: 0.22, ease: introEase }, 2.9)
+        .to('.intro-title', { opacity: 0, duration: 0.6, ease: introEase }, 5.0)
+        .add(finish, 5.5);
+      setTimeout(function () { ['pointerdown','keydown','wheel','touchstart'].forEach(function (ev) { window.addEventListener(ev, skip, { passive: true }); }); }, 800);
+      setTimeout(finish, 8000);   // segurança: nunca trava no preto
+      return true;
+    }
+
     function closePortal(withSound) {
       ss(KEY_ENTERED, '1');
       setMuted(!withSound);
       if (withSound) startAudio();   // o clique é o gesto que desbloqueia o áudio
       warmHero();
       portal.classList.add('pt-closing');
+      if (motion) startIntro();      // intro só com motion; reduced-motion vai direto pro hero
       var done = function () { portal.style.display = 'none'; doc.classList.add('entered'); };
       if (reduce) done(); else setTimeout(done, 950);
     }
