@@ -27,6 +27,7 @@
 <meta name="theme-color" content="#04090A">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20fill='%2304090A'/%3E%3Cpath%20d='M40%206%20L24%2058'%20stroke='%2399AC62'%20stroke-width='5'%20stroke-linecap='round'/%3E%3C/svg%3E">
 
+<script>try{if(sessionStorage.getItem('mz_entered'))document.documentElement.classList.add('entered');}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -313,6 +314,56 @@ html.gsap .w-title .mz-line{ display:block; will-change:transform }
 @property --chrome-accent{ syntax:'<color>'; inherits:true; initial-value:#99AC62 }
 :root{ --chrome-accent:#99AC62 }
 html.motion body{ transition:--chrome-accent .8s var(--ease) }
+
+/* ===== PARTE B — PORTAL DE BOAS-VINDAS + SOM ===== */
+.ch-right{ display:flex; align-items:center; gap:clamp(14px,2vw,22px); pointer-events:none }
+.ch-sound{ pointer-events:auto; background:none; border:0; padding:6px; cursor:pointer;
+  color:inherit; display:inline-flex; align-items:center; opacity:.72; transition:opacity .3s var(--ease) }
+.ch-sound:hover{ opacity:1 }
+.ch-sound .snd-wave{ transition:opacity .3s var(--ease) }
+.ch-sound .snd-slash{ opacity:0; transition:opacity .3s var(--ease) }
+.ch-sound.is-muted .snd-wave{ opacity:0 }
+.ch-sound.is-muted .snd-slash{ opacity:1 }
+.ch-sound:focus-visible{ outline:none; opacity:1 }
+.ch-sound:focus-visible svg{ filter:drop-shadow(0 0 3px var(--mz-green-light)) }
+
+#portal{
+  position:fixed; inset:0; z-index:200;
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  background:#04090A; padding:24px; opacity:1;
+  transition:opacity .9s var(--ease);
+}
+html.entered #portal{ display:none }
+#portal.pt-closing{ opacity:0; pointer-events:none }
+#portal::after{
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='240'%20height='240'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='240'%20height='240'%20filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.pt-inner{ position:relative; max-width:620px }
+.pt-spark{
+  width:2px; height:118px; margin:0 auto 46px;
+  background:linear-gradient(180deg, transparent, var(--mz-green-light) 32%, var(--mz-green) 60%, transparent);
+  transform:skewX(-16deg);
+}
+html.motion .pt-spark{ animation:ptbreath 3.6s var(--ease) infinite }
+@keyframes ptbreath{ 0%,100%{ opacity:.4; transform:skewX(-16deg) scaleY(.92) } 50%{ opacity:.95; transform:skewX(-16deg) scaleY(1.04) } }
+.pt-name{ font-family:var(--font-display); font-weight:300; text-transform:uppercase;
+  letter-spacing:.22em; font-size:clamp(1rem,2vw,1.3rem); color:var(--mz-cream) }
+.pt-name .sl{ color:var(--mz-green); margin-inline:.18em; font-weight:200 }
+.pt-desc{ margin-top:22px; font-size:clamp(1.05rem,1.7vw,1.32rem); line-height:1.62;
+  color:rgba(239,239,229,.78); max-width:40ch; margin-inline:auto }
+.pt-actions{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:48px }
+.pt-btn{ font-family:var(--font-display); font-weight:400; font-size:.82rem;
+  letter-spacing:.14em; text-transform:uppercase; padding:15px 30px; border-radius:14px;
+  cursor:pointer; transition:transform .3s var(--ease), background .3s var(--ease), border-color .3s var(--ease) }
+@media (hover:hover){ .pt-btn:hover{ transform:translateY(-2px) } }
+.pt-primary{ background:var(--mz-green); color:#04090A; border:1px solid var(--mz-green-light) }
+@media (hover:hover){ .pt-primary:hover{ background:var(--mz-green-light) } }
+.pt-ghost{ background:transparent; color:var(--mz-cream); border:1px solid rgba(239,239,229,.25) }
+@media (hover:hover){ .pt-ghost:hover{ border-color:var(--mz-cream) } }
+.pt-btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(200,216,144,.4) }
+html:not(.motion) #portal{ transition:none }
+html:not(.motion) .pt-spark{ animation:none }
 
 /* reveals — vanilla CSS + IntersectionObserver (canhão só no crítico) */
 html.motion .rv{ opacity:0; transform:translateY(32px); transition:opacity 1s var(--ease), transform 1s var(--ease) }
@@ -1373,13 +1424,35 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
 </head>
 <body data-world="abertura">
 
+<!-- PORTAL DE BOAS-VINDAS (nominal) — primeira cena; a escolha é o portão -->
+<div id="portal" role="dialog" aria-modal="true" aria-labelledby="ptName" aria-describedby="ptDesc">
+  <div class="pt-inner">
+    <div class="pt-spark" aria-hidden="true"></div>
+    <p id="ptName" class="pt-name">Maurício <span class="sl">&amp;</span> Carine —</p>
+    <p id="ptDesc" class="pt-desc">Obrigado pela confiança. O que vocês vão ver é o mapa dos próximos seis meses.</p>
+    <div class="pt-actions">
+      <button id="ptYes" class="pt-btn pt-primary" type="button">Entrar com som</button>
+      <button id="ptNo" class="pt-btn pt-ghost" type="button">Entrar sem som</button>
+    </div>
+  </div>
+</div>
+
 <!-- CHROME FIXO -->
 <header id="chrome">
   <a class="ch-mark" href="#abertura">MARCA<span class="sl">/</span>ZERO</a>
-  <button id="navBtn" class="ch-counter" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="navIndex" title="Abrir índice dos mundos">
-    <span id="chIdx">01</span><span class="sl">/</span><span>13</span>
-    <em id="chName">Abertura</em>
-  </button>
+  <div class="ch-right">
+    <button id="soundToggle" class="ch-sound is-muted" type="button" aria-label="Som ambiente" aria-pressed="false" title="Som ambiente">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 9v6h4l5 4V5L8 9H4z"/>
+        <g class="snd-wave"><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19.5 6a8.5 8.5 0 0 1 0 12"/></g>
+        <line class="snd-slash" x1="15.5" y1="8" x2="22" y2="16"/>
+      </svg>
+    </button>
+    <button id="navBtn" class="ch-counter" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="navIndex" title="Abrir índice dos mundos">
+      <span id="chIdx">01</span><span class="sl">/</span><span>13</span>
+      <em id="chName">Abertura</em>
+    </button>
+  </div>
 </header>
 <div id="rail" aria-hidden="true">
   <div id="rail-fill"></div>
@@ -2193,6 +2266,96 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
 
   if (motion) doc.classList.add('motion');
   if (motion && hasGSAP) doc.classList.add('gsap');
+
+  /* ===== PARTE B — PORTAL DE BOAS-VINDAS + TRILHA SONORA ===== */
+  (function () {
+    var portal = document.getElementById('portal');
+    if (!portal) return;
+    var soundBtn = document.getElementById('soundToggle');
+    var KEY_ENTERED = 'mz_entered', KEY_SOUND = 'mz_sound';
+    function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
+
+    /* --- motor de áudio: build 1x + corpo em loop com crossfade (Web Audio) --- */
+    var BUILD = 8.0, XFADE = 1.5, TARGET = 0.18;
+    var actx = null, buffer = null, master = null, loading = false, ready = false, muted = false;
+    function rampMaster(to, secs) {
+      if (!master || !actx) return;
+      var now = actx.currentTime;
+      master.gain.cancelScheduledValues(now);
+      master.gain.setValueAtTime(master.gain.value, now);
+      master.gain.linearRampToValueAtTime(to, now + secs);
+    }
+    function spawn(offset, when, first) {
+      var src = actx.createBufferSource(); src.buffer = buffer;
+      var g = actx.createGain(); src.connect(g); g.connect(master);
+      var end = when + (buffer.duration - offset), outAt = end - XFADE;
+      g.gain.setValueAtTime(first ? 1 : 0, when);
+      if (!first) g.gain.linearRampToValueAtTime(1, when + XFADE);
+      g.gain.setValueAtTime(1, outAt);
+      g.gain.linearRampToValueAtTime(0, end);
+      src.start(when, offset); src.stop(end + 0.05);
+      setTimeout(function () { if (ready) spawn(BUILD, outAt, false); }, Math.max(0, (outAt - actx.currentTime - 0.25) * 1000));
+    }
+    function startAudio() {
+      if (ready) { rampMaster(muted ? 0 : TARGET, 1); if (actx.state === 'suspended') actx.resume(); return; }
+      if (loading) return;
+      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      loading = true;
+      actx = new AC(); master = actx.createGain(); master.gain.value = 0; master.connect(actx.destination);
+      fetch('assets/audio/ambient-loop.mp3').then(function (r) { return r.arrayBuffer(); })
+        .then(function (a) { return actx.decodeAudioData(a); })
+        .then(function (buf) {
+          buffer = buf; ready = true; loading = false;
+          if (actx.state === 'suspended') actx.resume();
+          spawn(0, actx.currentTime + 0.06, true);   // build toca uma vez
+          rampMaster(muted ? 0 : TARGET, 2.5);        // fade-in 2.5s
+        })['catch'](function () { loading = false; });
+    }
+    function setMuted(m) {
+      muted = m;
+      if (soundBtn) { soundBtn.classList.toggle('is-muted', m); soundBtn.setAttribute('aria-pressed', String(!m)); }
+      ss(KEY_SOUND, m ? 'off' : 'on');
+      if (ready) rampMaster(m ? 0 : TARGET, 1);        // fade 1s — nunca corte seco
+    }
+    if (soundBtn) soundBtn.addEventListener('click', function () {
+      if (!ready && !loading) { muted = false; startAudio(); setMuted(false); }
+      else setMuted(!muted);
+    });
+
+    /* --- portal --- */
+    function warmHero() { var v = document.getElementById('heroVid'); if (v && v.currentSrc) { try { v.load(); } catch (e) {} } }
+    function closePortal(withSound) {
+      ss(KEY_ENTERED, '1');
+      setMuted(!withSound);
+      if (withSound) startAudio();   // o clique é o gesto que desbloqueia o áudio
+      warmHero();
+      portal.classList.add('pt-closing');
+      var done = function () { portal.style.display = 'none'; doc.classList.add('entered'); };
+      if (reduce) done(); else setTimeout(done, 950);
+    }
+
+    if (ss(KEY_ENTERED)) {
+      portal.style.display = 'none'; doc.classList.add('entered');
+      muted = ss(KEY_SOUND) !== 'on';
+      if (soundBtn) { soundBtn.classList.toggle('is-muted', muted); soundBtn.setAttribute('aria-pressed', String(!muted)); }
+      if (!muted) {   // autoplay exige gesto: arma na 1ª interação
+        var arm = function () { startAudio(); ['pointerdown', 'keydown', 'wheel'].forEach(function (ev) { window.removeEventListener(ev, arm); }); };
+        ['pointerdown', 'keydown'].forEach(function (ev) { window.addEventListener(ev, arm, { once: true }); });
+        window.addEventListener('wheel', arm, { once: true, passive: true });
+      }
+    } else {
+      var yes = document.getElementById('ptYes'), no = document.getElementById('ptNo');
+      if (yes) yes.addEventListener('click', function () { closePortal(true); });
+      if (no)  no.addEventListener('click', function () { closePortal(false); });
+      setTimeout(function () { if (yes) yes.focus(); }, 60);
+      portal.addEventListener('keydown', function (e) {
+        if (e.key !== 'Tab') return;          // sem ESC: a escolha é o portão
+        var f = [yes, no].filter(Boolean), i = f.indexOf(document.activeElement);
+        e.preventDefault();
+        f[e.shiftKey ? (i <= 0 ? f.length - 1 : i - 1) : (i >= f.length - 1 ? 0 : i + 1)].focus();
+      });
+    }
+  })();
 
   /* ---------- LENIS — só desktop (pointer fine); mobile = toque nativo [LEI] ---------- */
   var lenis = null;
