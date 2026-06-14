@@ -774,6 +774,9 @@ html.motion .caret{ animation:caret 1.1s steps(1) infinite }
 }
 .logo-frame figcaption b{ color:var(--mz-cream); font-weight:500 }
 #identidade .nasceram{ margin-top:20px; font-size:.9rem; color:var(--mz-green-light) }
+/* A3 — cortina das logos: máscara na área da imagem; a logo sobe de dentro dela */
+html.gsap #identidade .logo-mask{ display:block; overflow:clip }
+html.gsap #identidade .logo-frame img{ display:block }
 
 .idchecks{ margin-top:54px; display:grid; grid-template-columns:repeat(4,1fr); gap:16px }
 .idchecks .card{ padding:24px 22px }
@@ -2578,6 +2581,37 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         },
         onLeave:     function () { coSteps.forEach(function (s) { s.classList.add('active'); }); },
         onLeaveBack: function () { coSteps.forEach(function (s) { s.classList.remove('active'); }); }
+      });
+    }
+
+    /* IDENTIDADE — A3: as duas logos entram por cortina (máscara overflow:clip +
+       img transladando de baixo); depois os 4 checks acendem em sequência. */
+    var idFrames = gsap.utils.toArray('#identidade .logo-frame');
+    if (idFrames.length) {
+      idFrames.forEach(function (frame) {
+        frame.classList.remove('rv');
+        var img = frame.querySelector('img');
+        if (!img) return;
+        var mask = document.createElement('span');
+        mask.className = 'logo-mask';
+        img.parentNode.insertBefore(mask, img);
+        mask.appendChild(img);
+        gsap.set(img, { yPercent: 100 });
+      });
+      ScrollTrigger.create({
+        trigger: '#identidade .logo-show', start: 'top 78%', once: true,
+        onEnter: function () {
+          gsap.to('#identidade .logo-frame img', { yPercent: 0, duration: 1.0, stagger: 0.18, ease: mzEase });
+        }
+      });
+      var idChecks = gsap.utils.toArray('#identidade .idchecks .card');
+      idChecks.forEach(function (c) { c.classList.remove('rv'); });
+      gsap.set(idChecks, { opacity: 0, y: 24 });
+      ScrollTrigger.create({
+        trigger: '#identidade .idchecks', start: 'top 82%', once: true,
+        onEnter: function () {
+          gsap.to(idChecks, { opacity: 1, y: 0, duration: 0.6, stagger: 0.12, ease: mzEase });
+        }
       });
     }
 
