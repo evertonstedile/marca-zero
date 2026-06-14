@@ -2893,6 +2893,47 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       if (iaCallout) iaTl.to(iaCallout, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: mzEase }, '-=0.2');
     }
 
+    /* GOOGLE — A11: os 3 "resultados" surgem como uma SERP preenchendo, logo após
+       a busca digitar (typewriter #gType existente). Entrada limpa (fade + y), sem
+       blur — distinta do mundo Claude. Significado: procuraram → a marca aparece. */
+    var gPoints = gsap.utils.toArray('#google .gpoints .card');
+    if (gPoints.length) {
+      gPoints.forEach(function (c) { c.classList.remove('rv'); });
+      gsap.set(gPoints, { opacity: 0, y: 16 });
+      gsap.to(gPoints, {
+        opacity: 1, y: 0, duration: 0.55, stagger: 0.12, ease: mzEase,
+        scrollTrigger: { trigger: '#google .gpoints', start: 'top 80%', once: true }
+      });
+    }
+
+    /* JORNADA RAIZ — A12: "do solo ao fruto". A taproot se DESENHA scrubada ao
+       scroll enquanto o rail sticky acompanha; cada nó acende (cumulativo) e a
+       palavra de fase ativa migra (Terreno→…→Escala) ao passar por cada fase.
+       Distinta do Método (03, número-grande-pinado): aqui o rail-raiz acompanha
+       o cronograma. Desktop only — em mobile o rail é display:none (CSS). */
+    gsap.matchMedia().add('(min-width: 1021px)', function () {
+      var taproot = document.querySelector('#jornada .taproot');
+      var phases  = gsap.utils.toArray('#jornada .jr-phase');
+      var words   = gsap.utils.toArray('#jornada .jr-words span');
+      var nodes   = gsap.utils.toArray('#jornada .jr-node');
+      if (!taproot || !phases.length) return;
+      gsap.to(taproot, {
+        strokeDashoffset: 0, ease: 'none',
+        scrollTrigger: { trigger: '#jornada .jr-phases', start: 'top 70%', end: 'bottom 75%', scrub: 0.6 }
+      });
+      function setActive(idx) {
+        words.forEach(function (w, j) { w.classList.toggle('is-active', j === idx); });
+        nodes.forEach(function (n, j) { n.classList.toggle('is-active', j <= idx); });
+      }
+      phases.forEach(function (card, i) {
+        ScrollTrigger.create({
+          trigger: card, start: 'top 55%',
+          onEnter:     function () { setActive(i); },
+          onEnterBack: function () { setActive(i); }
+        });
+      });
+    });
+
     /* MÉTODO — palco pinado (logo no topo o tempo todo): a raiz se desenha com o
        scroll; a cada nó, o NÚMERO da fase aparece GRANDE e centralizado enquanto
        o fundo (logo + raiz + faixa) fica em segundo plano com blur */
