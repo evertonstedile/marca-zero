@@ -2875,6 +2875,24 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       }
     }
 
+    /* IA — A10: a "equipe de IA" se materializa como uma RESPOSTA sendo gerada
+       (blur 8px→foco, em cascata); a prompt-line acende em seguida (caret pisca)
+       e o callout ético fecha com peso. Encena "IA dirigida por critério humano".
+       Device distinto do typewriter do mundo Google. */
+    var iaTeam = gsap.utils.toArray('#ia .equipe .card');
+    if (iaTeam.length) {
+      var iaPrompt  = document.querySelector('#ia .prompt-line');
+      var iaCallout = document.querySelector('#ia .callout');
+      [iaPrompt, iaCallout].concat(iaTeam).forEach(function (el) { el && el.classList.remove('rv'); });
+      gsap.set(iaTeam, { opacity: 0, y: 18, filter: 'blur(8px)' });
+      if (iaPrompt)  gsap.set(iaPrompt,  { opacity: 0, x: -14 });
+      if (iaCallout) gsap.set(iaCallout, { opacity: 0, y: 14, scale: 0.96 });
+      var iaTl = gsap.timeline({ scrollTrigger: { trigger: '#ia .equipe', start: 'top 78%', once: true } });
+      iaTl.to(iaTeam, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.7, stagger: 0.12, ease: mzEase });
+      if (iaPrompt)  iaTl.to(iaPrompt,  { opacity: 1, x: 0, duration: 0.5, ease: mzEase }, '-=0.25');
+      if (iaCallout) iaTl.to(iaCallout, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: mzEase }, '-=0.2');
+    }
+
     /* MÉTODO — palco pinado (logo no topo o tempo todo): a raiz se desenha com o
        scroll; a cada nó, o NÚMERO da fase aparece GRANDE e centralizado enquanto
        o fundo (logo + raiz + faixa) fica em segundo plano com blur */
