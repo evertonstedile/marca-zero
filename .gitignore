@@ -7,3 +7,4 @@ DIRETRIZES-EVERTON.md
 # Infra
 node_modules/
 .DS_Store
+.claude/
