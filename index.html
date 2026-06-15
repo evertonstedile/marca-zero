@@ -1370,23 +1370,34 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
    ============================================================ */
 @media (max-width:1020px){
   .numgrid{ grid-template-columns:repeat(2,1fr) }
-  .metodo-focus{ display:none }
   .fz-svg{ display:none }
   .fases-grid{ grid-template-columns:1fr; gap:30px 0; position:relative; margin-top:0 }
   .fases-grid::before{
     content:""; position:absolute; left:5px; top:2px; bottom:2px; width:1px;
     background:linear-gradient(180deg, var(--mz-green-light), var(--mz-green) 50%, var(--mz-green-deep));
-    opacity:.5;
+    opacity:.6; transform-origin:top center; transform:scaleY(var(--fz-draw,1));
   }
   .fase{ padding:0 0 0 34px; text-align:left; transform-origin:0 50% }
   .fase::before{ top:.3em; left:0; transform:none }
+  /* PIN mobile do Método: número GIGANTE em evidência, fase a fase, raiz desenhando —
+     reproduz o desktop. Só com motion (.gsap); reduced-motion fica a lista normal. */
+  html.gsap .metodo-pin{ min-height:84vh; position:relative }
+  html.gsap .metodo-pin .fases{ margin-top:clamp(26px,5vh,46px) }
+  html.gsap .metodo-pin .fases-grid{ min-height:40vh }
+  html.gsap .metodo-pin .fases-grid .fase{ display:none }
+  html.gsap .metodo-pin .mf-item p{ font-size:.88rem; max-width:28ch }
   .forcas{ grid-template-columns:repeat(2,1fr) }
   .equipe .card{ grid-column:span 3 !important }
   .idchecks{ grid-template-columns:repeat(2,1fr) }
   .cenarios{ grid-template-columns:1fr; max-width:560px }
   .gpoints{ grid-template-columns:1fr; max-width:560px }
-  .jr-grid{ grid-template-columns:1fr }
-  .jr-rail{ display:none }
+  .jr-grid{ grid-template-columns:56px 1fr; gap:0 14px }
+  .jr-rail .w-eyebrow, .jr-words{ display:none }
+  .jr-sticky{ top:16vh }
+  .jr-svg{ width:56px; margin-top:0 }
+  .jr-svg .taproot{ stroke-width:4.5 }
+  .jr-node path{ stroke-width:3 }
+  .jr-node circle{ r:6 }
   .shop-grid{ grid-template-columns:1fr }
   .tt-grid{ grid-template-columns:1fr }
   .phones{ justify-content:flex-start }
@@ -2697,18 +2708,16 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
     }
   }
 
-  /* ---------- FASE ATIVA DA JORNADA (rail sticky + nós da raiz) ---------- */
+  /* ---------- FASE ATIVA DA JORNADA (rail + nós da raiz) ----------
+     Acionada por ScrollTrigger no bloco GSAP abaixo — o IntersectionObserver não
+     dispara de forma confiável para estes cards neste layout (testado: nem um IO
+     novo com os mesmos parâmetros acende, mesmo com o card no centro da tela). */
   var phaseWords = document.querySelectorAll('.jr-words span');
   var phaseNodes = document.querySelectorAll('.jr-node');
-  var phaseIO = new IntersectionObserver(function (entries) {
-    entries.forEach(function (en) {
-      if (!en.isIntersecting) return;
-      var ph = en.target.dataset.phase;
-      phaseWords.forEach(function (s) { s.classList.toggle('is-active', s.dataset.w === ph); });
-      phaseNodes.forEach(function (n) { n.classList.toggle('is-active', parseInt(n.dataset.node, 10) <= parseInt(ph, 10)); });
-    });
-  }, { rootMargin: '-42% 0px -42% 0px', threshold: 0 });
-  document.querySelectorAll('.jr-phase').forEach(function (p) { phaseIO.observe(p); });
+  function activateJrPhase(ph) {
+    phaseWords.forEach(function (s) { s.classList.toggle('is-active', s.dataset.w === ph); });
+    phaseNodes.forEach(function (n) { n.classList.toggle('is-active', parseInt(n.dataset.node, 10) <= parseInt(ph, 10)); });
+  }
 
   /* ---------- HERO VÍDEO — fonte por aspecto e codec; src só quando há motion ---------- */
   var heroVid = document.getElementById('heroVid');
@@ -3106,15 +3115,31 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         fzTl.to({}, { duration: 0.1 }); /* respiro antes do unpin */
       });
       fzMM.add('(max-width: 1020px)', function () {
-        fzFases.forEach(function (f) {
-          f.classList.remove('rv');
-          gsap.timeline({
-            scrollTrigger: { trigger: f, start: 'top 88%', end: 'top 30%', scrub: 0.4 }
-          })
-            .fromTo(f, { opacity: 0, scale: 0.6, x: -12 },
-                       { opacity: 1, scale: 1.18, x: 0, duration: 0.6, ease: 'none' })
-            .to(f, { scale: 1, duration: 0.4, ease: 'none' });
+        /* reproduz o desktop no retrato: a faixa PINA e cada fase aparece como NÚMERO
+           GIGANTE centralizado (mf-num) em evidência, com o fundo (logo+raiz) em blur e
+           a raiz desenhando — raiz > número em evidência > raiz > número, com zoom in/out. */
+        var fgrid = fz.querySelector('.fases-grid');
+        var mfItems = document.querySelectorAll('#metodo .mf-item');
+        var mBack = document.querySelector('#metodo .metodo-back');
+        var N = mfItems.length;
+        fzFases.forEach(function (f) { f.classList.remove('rv'); });
+        gsap.set(fgrid, { '--fz-draw': 0 });
+        gsap.set(mfItems, { opacity: 0, scale: 0.7, y: 24 });
+        var tl = gsap.timeline({
+          scrollTrigger: { trigger: '#metodoPin', start: 'top top', end: '+=' + (N * 62) + '%', scrub: 0.6, pin: true }
         });
+        mfItems.forEach(function (mf, i) {
+          var t = i;
+          tl.to(fgrid, { '--fz-draw': (i + 1) / N, ease: 'none', duration: 0.42 }, t);
+          tl.to(mBack, { filter: 'blur(7px)', opacity: 0.4, ease: 'none', duration: 0.1 }, t + 0.04);
+          tl.fromTo(mf, { opacity: 0, scale: 0.7, y: 24 },
+                       { opacity: 1, scale: 1, y: 0, ease: 'none', duration: 0.3, immediateRender: false }, t + 0.1);
+          if (i < N - 1) {
+            tl.to(mf, { opacity: 0, scale: 0.34, y: -12, ease: 'none', duration: 0.26 }, t + 0.66);
+            tl.to(mBack, { filter: 'blur(0px)', opacity: 1, ease: 'none', duration: 0.1 }, t + 0.7);
+          }
+        });
+        tl.to({}, { duration: 0.12 });
       });
     }
 
@@ -3194,6 +3219,14 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
     gsap.to('.jr-svg .taproot', {
       strokeDashoffset: 0, ease: 'none',
       scrollTrigger: { trigger: '.jr-phases', start: 'top 65%', end: 'bottom 60%', scrub: 0.5 }
+    });
+    /* JORNADA — fase ativa (palavra + nós acendendo): cada card ativa sua fase ao
+       cruzar o centro da tela. Via ScrollTrigger porque o IO não disparava (ver acima). */
+    document.querySelectorAll('.jr-phase').forEach(function (p) {
+      ScrollTrigger.create({
+        trigger: p, start: 'top center', end: 'bottom center',
+        onToggle: function (self) { if (self.isActive) activateJrPhase(p.dataset.phase); }
+      });
     });
 
     /* FAÍSCA "/" — A9: marca SOMENTE a entrada de cada uma das 6 fases RAIZ
