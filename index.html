@@ -3118,6 +3118,61 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       });
     }
 
+    /* MOBILE — CERIMÔNIA EM TOUCH: as seções que no desktop ganham pin/horizontal/
+       carrossel ficavam só com o reveal genérico (.rv = sobe 32px, igual em tudo).
+       Aqui cada seção recupera sua coreografia, agora SCRUBADA ao dedo (sem pin,
+       sem drift — nada que brigue com o scroll nativo). Toma o lugar do .rv. */
+    gsap.matchMedia().add('(max-width: 1020px)', function () {
+
+      /* MERCADO — a linha do tempo se CONSTRÓI: cada ano chega da esquerda e foca,
+         enquanto a faixa-raiz (.arc-fill scaleY) já cresce em paralelo. */
+      gsap.utils.toArray('.arc .arc-item').forEach(function (it) {
+        it.classList.remove('rv');
+        gsap.fromTo(it, { opacity: 0, x: -28 },
+          { opacity: 1, x: 0, ease: 'none', immediateRender: true,
+            scrollTrigger: { trigger: it, start: 'top 92%', end: 'top 64%', scrub: 0.5 } });
+      });
+
+      /* META — os 3 cenários ganham PROFUNDIDADE: entram de baixo crescendo de
+         0.92→1 com leve desfoque saindo de foco (o "empilhar" do desktop, em 1 coluna). */
+      gsap.utils.toArray('#meta .cenario').forEach(function (card) {
+        card.classList.remove('rv');
+        gsap.fromTo(card, { opacity: 0, y: 44, scale: 0.92, filter: 'blur(5px)' },
+          { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', ease: 'none', immediateRender: true,
+            scrollTrigger: { trigger: card, start: 'top 90%', end: 'top 56%', scrub: 0.5 } });
+      });
+
+      /* TIKTOK — o carrossel GANHA VIDA: as molduras entram em cascata da direita
+         quando a faixa surge (o swipe nativo segue funcionando depois). */
+      var ttPhones = gsap.utils.toArray('#tiktok .phone');
+      var ttVp = document.querySelector('#tiktok .phones-vp');
+      if (ttPhones.length && ttVp) {
+        ttVp.classList.remove('rv');
+        gsap.set(ttPhones, { opacity: 0, x: 40, scale: 0.9 });
+        ScrollTrigger.create({
+          trigger: ttVp, start: 'top 84%', once: true,
+          onEnter: function () {
+            gsap.to(ttPhones, { opacity: 1, x: 0, scale: 1, duration: 0.6, stagger: 0.08, ease: mzEase });
+          }
+        });
+      }
+
+      /* JORNADA — o rail-raiz é display:none no mobile, então as fases carregam a
+         cinemática: cada uma desliza da esquerda (como brotando da linha lateral) e
+         o número da fase pulsa ao entrar. Movimento horizontal, distinto do resto. */
+      gsap.utils.toArray('#jornada .jr-phase').forEach(function (card) {
+        card.classList.remove('rv');
+        var numNode = card.querySelector('.ph-top h3 i, h3 i');
+        var tl = gsap.timeline({
+          scrollTrigger: { trigger: card, start: 'top 88%', end: 'top 58%', scrub: 0.5 }
+        });
+        tl.fromTo(card, { opacity: 0, x: -26 },
+          { opacity: 1, x: 0, ease: 'none', immediateRender: true }, 0);
+        if (numNode) tl.fromTo(numNode, { scale: 0.55, opacity: 0.2 },
+          { scale: 1, opacity: 1, ease: 'none', immediateRender: true }, 0);
+      });
+    });
+
     /* RODAPÉ — scrub do filme da raiz + a logo RAIZ se materializa sobre o feixe */
     var fTrack = document.getElementById('fTrack');
     if (fTrack && footVid) {
