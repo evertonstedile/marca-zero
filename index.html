@@ -2332,29 +2332,52 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         })['catch'](function () { loading = false; });
     }
 
-    /* estalo de "rachadura" saindo da raiz — sintetizado (Web Audio), 1x na intro */
+    /* "ignição" futurista que acompanha o P&B→cor (Web Audio, 1x na intro):
+       sub grave (profundidade) + riser com lowpass abrindo + acorde aberto no
+       pico (a cor nasce) + shimmer de ar. Suave e musical, sem aspereza. */
     function playCrack() {
       if (!actx) return;
       try {
-        var t = actx.currentTime + 0.12, dur = 1.7;
-        var osc = actx.createOscillator(); osc.type = 'sine';            // rumble grave = a raiz
-        osc.frequency.setValueAtTime(44, t); osc.frequency.exponentialRampToValueAtTime(19, t + dur);
-        var og = actx.createGain(); og.gain.setValueAtTime(0.0001, t);
-        og.gain.exponentialRampToValueAtTime(0.55, t + 0.05); og.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-        osc.connect(og); og.connect(actx.destination); osc.start(t); osc.stop(t + dur + 0.05);
-        var len = Math.floor(actx.sampleRate * dur);                      // crackle = a rachadura
-        var nb = actx.createBuffer(1, len, actx.sampleRate), ch = nb.getChannelData(0);
-        for (var i = 0; i < len; i++) { var env = (1 - i / len); ch[i] = (Math.random() * 2 - 1) * env * env; }
-        var noise = actx.createBufferSource(); noise.buffer = nb;
-        var bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.8;
-        bp.frequency.setValueAtTime(2400, t); bp.frequency.exponentialRampToValueAtTime(480, t + dur);
-        var ng = actx.createGain(); ng.gain.setValueAtTime(0.0001, t);
-        ng.gain.exponentialRampToValueAtTime(0.5,  t + 0.03);
-        ng.gain.exponentialRampToValueAtTime(0.07, t + 0.32);
-        ng.gain.exponentialRampToValueAtTime(0.3,  t + 0.62);
-        ng.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-        noise.connect(bp); bp.connect(ng); ng.connect(actx.destination);
-        noise.start(t); noise.stop(t + dur + 0.05);
+        var t0 = actx.currentTime + 0.08;
+        var out = actx.createGain(); out.gain.value = 0.85; out.connect(actx.destination);
+
+        // 1) SUB — profundidade (a raiz), sem rumble áspero
+        var sub = actx.createOscillator(); sub.type = 'sine';
+        sub.frequency.setValueAtTime(46, t0); sub.frequency.linearRampToValueAtTime(64, t0 + 2.3);
+        var sg = actx.createGain(); sg.gain.setValueAtTime(0.0001, t0);
+        sg.gain.exponentialRampToValueAtTime(0.3, t0 + 0.6); sg.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.6);
+        sub.connect(sg); sg.connect(out); sub.start(t0); sub.stop(t0 + 2.7);
+
+        // 2) RISER — duas saws detune subindo + lowpass abrindo (build futurista)
+        var lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 0.7;
+        lp.frequency.setValueAtTime(260, t0); lp.frequency.exponentialRampToValueAtTime(4200, t0 + 2.1);
+        var rg = actx.createGain(); rg.gain.setValueAtTime(0.0001, t0);
+        rg.gain.exponentialRampToValueAtTime(0.14, t0 + 1.9); rg.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.6);
+        lp.connect(rg); rg.connect(out);
+        [0, 1.6].forEach(function (det) {
+          var s = actx.createOscillator(); s.type = 'sawtooth';
+          s.frequency.setValueAtTime(150 + det, t0); s.frequency.exponentialRampToValueAtTime(740 + det * 4, t0 + 2.1);
+          s.connect(lp); s.start(t0); s.stop(t0 + 2.6);
+        });
+
+        // 3) BLOOM — acorde aberto (quinta + oitava) no pico ~2.05s: a cor "nasce"
+        var bt = t0 + 2.05, bloom = actx.createGain(); bloom.gain.value = 1; bloom.connect(out);
+        [392.0, 587.33, 784.0].forEach(function (f, i) {
+          var o = actx.createOscillator(); o.type = 'sine'; o.frequency.value = f;
+          var g = actx.createGain(); g.gain.setValueAtTime(0.0001, bt);
+          g.gain.exponentialRampToValueAtTime(0.11 / (i + 1), bt + 0.05);
+          g.gain.exponentialRampToValueAtTime(0.0001, bt + 1.7);
+          o.connect(g); g.connect(bloom); o.start(bt); o.stop(bt + 1.8);
+        });
+
+        // 4) SHIMMER — ar/sparkle suave no bloom (ruído highpass)
+        var len = Math.floor(actx.sampleRate * 1.2), nb = actx.createBuffer(1, len, actx.sampleRate), ch = nb.getChannelData(0);
+        for (var i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / len);
+        var nz = actx.createBufferSource(); nz.buffer = nb;
+        var hp = actx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 6200;
+        var ng = actx.createGain(); ng.gain.setValueAtTime(0.0001, bt);
+        ng.gain.exponentialRampToValueAtTime(0.045, bt + 0.12); ng.gain.exponentialRampToValueAtTime(0.0001, bt + 1.0);
+        nz.connect(hp); hp.connect(ng); ng.connect(out); nz.start(bt); nz.stop(bt + 1.2);
       } catch (e) {}
     }
     function setMuted(m) {
@@ -2407,7 +2430,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
     function closePortal(withSound) {
       ss(KEY_ENTERED, '1');
       setMuted(!withSound);
-      if (withSound) { startAudio(4.5); playCrack(); }   // música em fade-in (~intro) + estalo da raiz
+      if (withSound) { startAudio(4.5); playCrack(); }   // música em fade-in (~intro) + ignição
       warmHero();
       portal.classList.add('pt-closing');
       if (motion) startIntro();      // intro só com motion; reduced-motion vai direto pro hero
