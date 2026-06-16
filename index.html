@@ -690,6 +690,7 @@ html:not(.gsap) .metodo-focus{ display:none }
 .fz-svg path{ fill:none; stroke:url(#fzGrad); stroke-linecap:round }
 .fz-svg .fz-main{ stroke-width:2 }
 .fz-svg .fz-br{ stroke-width:1.2; opacity:.75 }
+.fz-svg .fz-root{ stroke-width:1; opacity:.42; display:none } /* raízes descendentes — só mobile */
 /* desenho via offset (mesma técnica do taproot da Jornada — dasharray no CSS,
    GSAP anima só o offset; evita o risco de unidade px no dasharray inline) */
 html.gsap .fz-svg path{ stroke-dasharray:1000; stroke-dashoffset:1000 }
@@ -1382,9 +1383,10 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
   .fase::before{ top:.3em; left:0; transform:none }
   /* PIN mobile do Método: número GIGANTE em evidência + a RAIZ (fz-svg) sempre visível
      no bg, desenhando (só a logo desfoca). Reproduz o desktop. Reduced-motion = lista. */
-  html.gsap .metodo-pin{ min-height:84vh; position:relative; display:flex; flex-direction:column; justify-content:center }
-  html.gsap .metodo-pin .fases{ margin-top:clamp(16px,3vh,30px) }
-  html.gsap .metodo-pin .fz-svg{ display:block }
+  html.gsap .metodo-pin{ min-height:84vh; position:relative }
+  html.gsap .metodo-pin .fases{ margin-top:clamp(18px,4vh,40px) }
+  html.gsap .metodo-pin .fz-svg{ display:block; overflow:visible }
+  html.gsap .metodo-pin .fz-root{ display:inline }  /* mostra as raízes descendentes no mobile */
   html.gsap .metodo-pin .fases-grid{ display:none }
   html.gsap .metodo-pin .mf-item p{ font-size:.88rem; max-width:28ch }
   .forcas{ grid-template-columns:repeat(2,1fr) }
@@ -1410,6 +1412,14 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
     transition:background .5s var(--ease), border-color .5s var(--ease), box-shadow .5s var(--ease);
   }
   .jr-phase.jr-lit::before{ background:var(--mz-green); border-color:var(--mz-green-light); box-shadow:0 0 14px rgba(153,172,98,.6); }
+  /* efeito de RAIZ: pelos finos saindo da linha (acendem com a fase) */
+  .jr-phase::after{
+    content:""; position:absolute; left:-27px; top:36px; width:17px; height:1.5px;
+    background:linear-gradient(90deg, var(--mz-green-deep), transparent);
+    transform-origin:left center; transform:rotate(38deg) scaleX(.6);
+    opacity:.35; transition:opacity .5s var(--ease), transform .5s var(--ease);
+  }
+  .jr-phase.jr-lit::after{ opacity:.7; transform:rotate(38deg) scaleX(1) }
   /* esteira do Checkout: o flow não clipa (os cards entram da direita via transform) */
   html.gsap #checkout .flow{ overflow:visible }
   .shop-grid{ grid-template-columns:1fr }
@@ -1666,6 +1676,13 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
             <path class="fz-br" pathLength="1000" d="M700 32 C 706 58, 712 78, 720 106"/>
             <path class="fz-br" pathLength="1000" d="M900 30 C 894 56, 890 76, 884 102"/>
             <path class="fz-br" pathLength="1000" d="M1100 36 C 1106 58, 1110 78, 1116 104"/>
+            <!-- raízes longas descendentes (só mobile, preenchem o vazio abaixo) -->
+            <path class="fz-root" pathLength="1000" d="M100 104 C 92 320, 110 760, 100 1160"/>
+            <path class="fz-root" pathLength="1000" d="M300 106 C 312 340, 290 780, 304 1160"/>
+            <path class="fz-root" pathLength="1000" d="M500 104 C 490 320, 512 760, 497 1160"/>
+            <path class="fz-root" pathLength="1000" d="M700 106 C 714 340, 688 790, 703 1160"/>
+            <path class="fz-root" pathLength="1000" d="M900 102 C 890 320, 912 760, 896 1160"/>
+            <path class="fz-root" pathLength="1000" d="M1100 104 C 1112 340, 1088 780, 1103 1160"/>
           </svg>
           <div class="fases-grid">
             <div class="fase rv"><h3><i>Fase 1</i>Terreno</h3><p>Onde plantar: o mercado é lido antes de qualquer produto.</p></div>
@@ -3140,6 +3157,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         var mLogo = document.querySelector('#metodo .metodo-logo');
         var fzMain = fz.querySelector('.fz-main');
         var fzBrs = fz.querySelectorAll('.fz-br');
+        var fzRoots = fz.querySelectorAll('.fz-root');
         var fzSvg = fz.querySelector('.fz-svg');
         var focus = document.querySelector('#metodo .metodo-focus');
         var N = mfItems.length;
@@ -3164,6 +3182,9 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
                             { strokeDashoffset: seg1, ease: 'none', duration: 0.34, immediateRender: false }, t);
           if (fzBrs[i]) tl.fromTo(fzBrs[i], { strokeDashoffset: 1000 },
                             { strokeDashoffset: 0, ease: 'none', duration: 0.18, immediateRender: false }, t + 0.16);
+          /* a raiz LONGA desce no vazio enquanto o número volta pra linha */
+          if (fzRoots[i]) tl.fromTo(fzRoots[i], { strokeDashoffset: 1000 },
+                            { strokeDashoffset: 0, ease: 'none', duration: 0.5, immediateRender: false }, t + 0.58);
           tl.to(mLogo, { filter: 'blur(6px)', opacity: 0.4, ease: 'none', duration: 0.1 }, t + 0.06);
           tl.fromTo(mf, { opacity: 0, scale: 0.7, y: 24 },
                        { opacity: 1, scale: 1, y: 0, ease: 'none', duration: 0.3, immediateRender: false }, t + 0.12);
