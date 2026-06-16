@@ -1392,13 +1392,24 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
   .idchecks{ grid-template-columns:repeat(2,1fr) }
   .cenarios{ grid-template-columns:1fr; max-width:560px }
   .gpoints{ grid-template-columns:1fr; max-width:560px }
-  .jr-grid{ grid-template-columns:56px 1fr; gap:0 14px }
-  .jr-rail .w-eyebrow, .jr-words{ display:none }
-  .jr-sticky{ top:16vh }
-  .jr-svg{ width:56px; margin-top:0 }
-  .jr-svg .taproot{ stroke-width:4.5 }
-  .jr-node path{ stroke-width:3 }
-  .jr-node circle{ r:6 }
+  /* Jornada mobile: a raiz vira um TRILHO VERTICAL full-height ao lado dos cards —
+     a linha percorre TODA a jornada (desenha com o scroll) e um nó acende ao lado de
+     cada card. Substitui a espinha sticky curta que ficava solta no topo. */
+  .jr-grid{ grid-template-columns:1fr }
+  .jr-rail{ display:none }
+  .jr-phases{ position:relative; padding-left:34px }
+  .jr-phases::before{
+    content:""; position:absolute; left:7px; top:8px; bottom:8px; width:2px;
+    background:linear-gradient(180deg, var(--mz-green-light), var(--mz-green) 50%, var(--mz-green-deep));
+    transform-origin:top center; transform:scaleY(var(--jr-draw,1)); opacity:.85;
+  }
+  .jr-phase{ position:relative }
+  .jr-phase::before{
+    content:""; position:absolute; left:-33px; top:16px; width:14px; height:14px; border-radius:50%;
+    background:#04090A; border:2px solid var(--mz-green-deep); z-index:1;
+    transition:background .5s var(--ease), border-color .5s var(--ease), box-shadow .5s var(--ease);
+  }
+  .jr-phase.jr-lit::before{ background:var(--mz-green); border-color:var(--mz-green-light); box-shadow:0 0 14px rgba(153,172,98,.6); }
   .shop-grid{ grid-template-columns:1fr }
   .tt-grid{ grid-template-columns:1fr }
   .phones{ justify-content:flex-start }
@@ -2718,6 +2729,10 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
   function activateJrPhase(ph) {
     phaseWords.forEach(function (s) { s.classList.toggle('is-active', s.dataset.w === ph); });
     phaseNodes.forEach(function (n) { n.classList.toggle('is-active', parseInt(n.dataset.node, 10) <= parseInt(ph, 10)); });
+    /* mobile: acende o nó ao lado de cada card até a fase ativa (trilho-raiz vertical) */
+    document.querySelectorAll('#jornada .jr-phase').forEach(function (p) {
+      p.classList.toggle('jr-lit', parseInt(p.dataset.phase, 10) <= parseInt(ph, 10));
+    });
   }
 
   /* ---------- HERO VÍDEO — fonte por aspecto e codec; src só quando há motion ---------- */
@@ -3247,6 +3262,12 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
           { opacity: 1, x: 0, ease: 'none', immediateRender: true }, 0);
         if (numNode) tl.fromTo(numNode, { scale: 0.55, opacity: 0.2 },
           { scale: 1, opacity: 1, ease: 'none', immediateRender: true }, 0);
+      });
+
+      /* o trilho-raiz vertical DESENHA conforme a jornada passa (full-height) */
+      gsap.fromTo('#jornada .jr-phases', { '--jr-draw': 0 }, {
+        '--jr-draw': 1, ease: 'none',
+        scrollTrigger: { trigger: '#jornada .jr-phases', start: 'top 78%', end: 'bottom 75%', scrub: 0.5 }
       });
     });
 
