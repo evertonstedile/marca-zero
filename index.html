@@ -1382,8 +1382,8 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
   .fase::before{ top:.3em; left:0; transform:none }
   /* PIN mobile do Método: número GIGANTE em evidência + a RAIZ (fz-svg) sempre visível
      no bg, desenhando (só a logo desfoca). Reproduz o desktop. Reduced-motion = lista. */
-  html.gsap .metodo-pin{ min-height:84vh; position:relative }
-  html.gsap .metodo-pin .fases{ margin-top:clamp(20px,4vh,40px) }
+  html.gsap .metodo-pin{ min-height:84vh; position:relative; display:flex; flex-direction:column; justify-content:center }
+  html.gsap .metodo-pin .fases{ margin-top:clamp(16px,3vh,30px) }
   html.gsap .metodo-pin .fz-svg{ display:block }
   html.gsap .metodo-pin .fases-grid{ display:none }
   html.gsap .metodo-pin .mf-item p{ font-size:.88rem; max-width:28ch }
@@ -1410,6 +1410,8 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
     transition:background .5s var(--ease), border-color .5s var(--ease), box-shadow .5s var(--ease);
   }
   .jr-phase.jr-lit::before{ background:var(--mz-green); border-color:var(--mz-green-light); box-shadow:0 0 14px rgba(153,172,98,.6); }
+  /* esteira do Checkout: o flow não clipa (os cards entram da direita via transform) */
+  html.gsap #checkout .flow{ overflow:visible }
   .shop-grid{ grid-template-columns:1fr }
   .tt-grid{ grid-template-columns:1fr }
   .phones{ justify-content:flex-start }
@@ -3203,50 +3205,44 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
             scrollTrigger: { trigger: card, start: 'top 90%', end: 'top 56%', scrub: 0.5 } });
       });
 
-      /* CHECKOUT — TRAVA o scroll no capítulo (pin) até os 6 passos do funil serem
-         REVELADOS e ACESOS (cor) um a um, panoramizando para acompanhar. Depois libera. */
+      /* CHECKOUT — TRAVA o scroll (pin); ESTEIRA: os cards entram da extrema direita e
+         deslizam pra a esquerda com o scroll, CENTRALIZANDO um a um, e ACENDEM (cor).
+         Card 1 já começa centralizado. Libera quando todos passaram. */
       var coFlow = document.querySelector('#checkout .flow');
       var coSteps = gsap.utils.toArray('#checkout .flow-step');
       if (coFlow && coSteps.length) {
         coFlow.classList.remove('rv');
-        gsap.set(coSteps, { opacity: 0, y: 22 });
         coSteps.forEach(function (s) { s.classList.remove('active'); });
-        var coP = { x: 0 };
+        var coN = coSteps.length;
+        var coCx = function (i) { var s = coSteps[i]; return Math.round(coFlow.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)); };
+        gsap.set(coFlow, { x: function () { return coCx(0); } });
         var coTl = gsap.timeline({
-          scrollTrigger: { trigger: '#checkout', start: 'center center', end: '+=' + (coSteps.length * 42) + '%', scrub: 0.5, pin: true,
+          scrollTrigger: { trigger: '#checkout', start: 'center center', end: '+=' + (coN * 50) + '%', scrub: 0.5, pin: true,
             onUpdate: function (self) {
-              var lit = Math.round(self.progress * coSteps.length);
+              var lit = Math.min(coN, Math.floor(self.progress * (coN - 1) + 0.5) + 1);
               coSteps.forEach(function (s, i) { s.classList.toggle('active', i < lit); });
             }
           }
         });
-        coSteps.forEach(function (s, i) {
-          coTl.to(s, { opacity: 1, y: 0, ease: 'none', duration: 0.8 }, i * 0.8);
-        });
-        coTl.to(coP, { x: 1, ease: 'none', duration: coSteps.length * 0.8,
-          onUpdate: function () { coFlow.scrollLeft = coP.x * Math.max(0, coFlow.scrollWidth - coFlow.clientWidth); } }, 0);
+        coTl.to(coFlow, { x: function () { return coCx(coN - 1); }, ease: 'none', duration: 1 }, 0);
       }
 
-      /* TIKTOK — TRAVA o scroll no capítulo (pin) até as 3 molduras serem reveladas uma
-         a uma e o carrossel deslizar mostrando todas. Depois libera. (igual ao cap 8) */
+      /* TIKTOK — TRAVA o scroll (pin); ESTEIRA igual ao cap 8: as molduras entram da
+         direita e centralizam uma a uma. x dirigido pelo progresso no onUpdate (robusto:
+         o scrub de timeline falhava para o track dentro do vp overflow:hidden). */
       var ttPhones = gsap.utils.toArray('#tiktok .phone');
       var ttVp = document.querySelector('#tiktok .phones-vp');
       if (ttPhones.length && ttVp) {
         ttVp.classList.remove('rv');
         var ttTrack = ttVp.querySelector('.phones');
-        gsap.set(ttPhones, { opacity: 0, x: 44, scale: 0.9 });
-        var ttTl = gsap.timeline({
-          scrollTrigger: { trigger: '#tiktok', start: 'center center', end: '+=' + (ttPhones.length * 50) + '%', scrub: 0.5, pin: true }
+        var ttN = ttPhones.length;
+        var ttCx = function (i) { var p = ttPhones[i]; return Math.round(ttVp.clientWidth / 2 - (p.offsetLeft + p.offsetWidth / 2)); };
+        gsap.set(ttTrack, { x: ttCx(0) });
+        ScrollTrigger.create({
+          trigger: '#tiktok', start: 'center center', end: '+=' + (ttN * 50) + '%', scrub: 0.5, pin: true,
+          onRefresh: function () { gsap.set(ttTrack, { x: ttCx(0) }); },
+          onUpdate: function (self) { var a = ttCx(0), b = ttCx(ttN - 1); gsap.set(ttTrack, { x: a + (b - a) * self.progress }); }
         });
-        ttPhones.forEach(function (ph, i) {
-          ttTl.to(ph, { opacity: 1, x: 0, scale: 1, ease: 'none', duration: 0.7 }, i * 0.8);
-        });
-        if (ttTrack) {
-          ttTl.fromTo(ttTrack, { x: 0 }, {
-            x: function () { return Math.min(0, ttVp.clientWidth - ttTrack.scrollWidth); },
-            ease: 'none', duration: ttPhones.length * 0.8
-          }, 0);
-        }
       }
 
       /* JORNADA — o rail-raiz é display:none no mobile, então as fases carregam a
