@@ -1072,7 +1072,8 @@ html.gsap #tiktok .phone{ flex:0 0 auto; width:clamp(128px,15vw,158px); max-widt
   .phones-vp{ overflow-x:auto; overflow-y:hidden; scroll-snap-type:x proximity;
     touch-action:pan-x; -webkit-overflow-scrolling:touch; scrollbar-width:none }
   .phones-vp::-webkit-scrollbar{ display:none }
-  html.gsap #tiktok .phone{ scroll-snap-align:center }
+  /* com motion o carrossel anda sozinho (drift via transform) — overflow oculto, sem snap */
+  html.gsap .phones-vp{ overflow:hidden; scroll-snap-type:none }
 }
 #tiktok .callout{ margin-top:60px; border-color:rgba(254,44,85,.3); background:rgba(254,44,85,.04) }
 #tiktok .marco{ margin-top:44px; border-color:#FE2C55 }
@@ -1379,12 +1380,12 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
   }
   .fase{ padding:0 0 0 34px; text-align:left; transform-origin:0 50% }
   .fase::before{ top:.3em; left:0; transform:none }
-  /* PIN mobile do Método: número GIGANTE em evidência, fase a fase, raiz desenhando —
-     reproduz o desktop. Só com motion (.gsap); reduced-motion fica a lista normal. */
+  /* PIN mobile do Método: número GIGANTE em evidência + a RAIZ (fz-svg) sempre visível
+     no bg, desenhando (só a logo desfoca). Reproduz o desktop. Reduced-motion = lista. */
   html.gsap .metodo-pin{ min-height:84vh; position:relative }
-  html.gsap .metodo-pin .fases{ margin-top:clamp(26px,5vh,46px) }
-  html.gsap .metodo-pin .fases-grid{ min-height:40vh }
-  html.gsap .metodo-pin .fases-grid .fase{ display:none }
+  html.gsap .metodo-pin .fases{ margin-top:clamp(20px,4vh,40px) }
+  html.gsap .metodo-pin .fz-svg{ display:block }
+  html.gsap .metodo-pin .fases-grid{ display:none }
   html.gsap .metodo-pin .mf-item p{ font-size:.88rem; max-width:28ch }
   .forcas{ grid-template-columns:repeat(2,1fr) }
   .equipe .card{ grid-column:span 3 !important }
@@ -3115,28 +3116,33 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         fzTl.to({}, { duration: 0.1 }); /* respiro antes do unpin */
       });
       fzMM.add('(max-width: 1020px)', function () {
-        /* reproduz o desktop no retrato: a faixa PINA e cada fase aparece como NÚMERO
-           GIGANTE centralizado (mf-num) em evidência, com o fundo (logo+raiz) em blur e
-           a raiz desenhando — raiz > número em evidência > raiz > número, com zoom in/out. */
-        var fgrid = fz.querySelector('.fases-grid');
+        /* reproduz o desktop no retrato: a faixa PINA, a RAIZ (fz-svg) desenha e fica
+           SEMPRE visível no bg, e cada fase aparece como NÚMERO GIGANTE em evidência.
+           Só a LOGO desfoca — raiz > número > raiz com número > número. */
         var mfItems = document.querySelectorAll('#metodo .mf-item');
-        var mBack = document.querySelector('#metodo .metodo-back');
+        var mLogo = document.querySelector('#metodo .metodo-logo');
+        var fzMain = fz.querySelector('.fz-main');
+        var fzBrs = fz.querySelectorAll('.fz-br');
         var N = mfItems.length;
         fzFases.forEach(function (f) { f.classList.remove('rv'); });
-        gsap.set(fgrid, { '--fz-draw': 0 });
         gsap.set(mfItems, { opacity: 0, scale: 0.7, y: 24 });
         var tl = gsap.timeline({
           scrollTrigger: { trigger: '#metodoPin', start: 'top top', end: '+=' + (N * 62) + '%', scrub: 0.6, pin: true }
         });
         mfItems.forEach(function (mf, i) {
           var t = i;
-          tl.to(fgrid, { '--fz-draw': (i + 1) / N, ease: 'none', duration: 0.42 }, t);
-          tl.to(mBack, { filter: 'blur(7px)', opacity: 0.4, ease: 'none', duration: 0.1 }, t + 0.04);
+          var seg0 = Math.round(1000 * (1 - i / N));
+          var seg1 = Math.round(1000 * (1 - (i + 1) / N));
+          tl.fromTo(fzMain, { strokeDashoffset: seg0 },
+                            { strokeDashoffset: seg1, ease: 'none', duration: 0.34, immediateRender: false }, t);
+          if (fzBrs[i]) tl.fromTo(fzBrs[i], { strokeDashoffset: 1000 },
+                            { strokeDashoffset: 0, ease: 'none', duration: 0.18, immediateRender: false }, t + 0.16);
+          tl.to(mLogo, { filter: 'blur(6px)', opacity: 0.4, ease: 'none', duration: 0.1 }, t + 0.06);
           tl.fromTo(mf, { opacity: 0, scale: 0.7, y: 24 },
-                       { opacity: 1, scale: 1, y: 0, ease: 'none', duration: 0.3, immediateRender: false }, t + 0.1);
+                       { opacity: 1, scale: 1, y: 0, ease: 'none', duration: 0.3, immediateRender: false }, t + 0.12);
           if (i < N - 1) {
             tl.to(mf, { opacity: 0, scale: 0.34, y: -12, ease: 'none', duration: 0.26 }, t + 0.66);
-            tl.to(mBack, { filter: 'blur(0px)', opacity: 1, ease: 'none', duration: 0.1 }, t + 0.7);
+            tl.to(mLogo, { filter: 'blur(0px)', opacity: 1, ease: 'none', duration: 0.1 }, t + 0.7);
           }
         });
         tl.to({}, { duration: 0.12 });
@@ -3167,8 +3173,18 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
             scrollTrigger: { trigger: card, start: 'top 90%', end: 'top 56%', scrub: 0.5 } });
       });
 
+      /* CHECKOUT — o funil PANORAMIZA: a fileira de passos desliza na horizontal
+         conforme o scroll (revela cada card) enquanto eles ACENDEM um a um (.active). */
+      var coFlow = document.querySelector('#checkout .flow');
+      if (coFlow) {
+        var coP = { x: 0 };
+        gsap.to(coP, { x: 1, ease: 'none',
+          scrollTrigger: { trigger: '#checkout .flow', start: 'top 80%', end: 'top 24%', scrub: 0.5 },
+          onUpdate: function () { coFlow.scrollLeft = coP.x * Math.max(0, coFlow.scrollWidth - coFlow.clientWidth); } });
+      }
+
       /* TIKTOK — o carrossel GANHA VIDA: as molduras entram em cascata da direita
-         quando a faixa surge (o swipe nativo segue funcionando depois). */
+         e depois ANDAM SOZINHAS (vai-e-volta suave); o toque pausa e o swipe assume. */
       var ttPhones = gsap.utils.toArray('#tiktok .phone');
       var ttVp = document.querySelector('#tiktok .phones-vp');
       if (ttPhones.length && ttVp) {
@@ -3180,6 +3196,17 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
             gsap.to(ttPhones, { opacity: 1, x: 0, scale: 1, duration: 0.6, stagger: 0.08, ease: mzEase });
           }
         });
+        /* o trilho DESLIZA conforme o scroll da página (de acordo com o scroll, igual
+           ao espírito do drift do desktop) — via ScrollTrigger scrub, que é o que
+           funciona neste site (tweens de auto-play/ticker não avançam aqui). */
+        var ttTrack = ttVp.querySelector('.phones');
+        if (ttTrack) {
+          gsap.fromTo(ttTrack, { x: 0 }, {
+            x: function () { return Math.min(0, ttVp.clientWidth - ttTrack.scrollWidth); },
+            ease: 'none', immediateRender: false,
+            scrollTrigger: { trigger: '#tiktok', start: 'top 80%', end: 'bottom top', scrub: 0.6 }
+          });
+        }
       }
 
       /* JORNADA — o rail-raiz é display:none no mobile, então as fases carregam a
