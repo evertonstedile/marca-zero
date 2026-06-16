@@ -12,18 +12,18 @@
 <meta property="og:locale" content="pt_BR">
 <!-- URLs absolutas no domínio final (Cloudflare Pages + Access). Nota: o site é
      protegido por Access, então scrapers não leem estas tags (sem preview público) -->
-<meta property="og:url" content="https://marca-zero.evertonstedile.com.br/">
-<meta property="og:image" content="https://marca-zero.evertonstedile.com.br/assets/og-image.jpg">
-<meta property="og:image:secure_url" content="https://marca-zero.evertonstedile.com.br/assets/og-image.jpg">
+<meta property="og:url" content="https://marcazero.evertonstedile.com.br/">
+<meta property="og:image" content="https://marcazero.evertonstedile.com.br/assets/og-image.jpg">
+<meta property="og:image:secure_url" content="https://marcazero.evertonstedile.com.br/assets/og-image.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Marca Zero — wordmark sobre faísca e raízes verdes do Método RAIZ">
-<link rel="canonical" href="https://marca-zero.evertonstedile.com.br/">
+<link rel="canonical" href="https://marcazero.evertonstedile.com.br/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Marca Zero — Método RAIZ">
 <meta name="twitter:description" content="Do zero à marca. 6 fases, 6 mundos, 53 sessões — mercado e marca antes de tráfego.">
-<meta name="twitter:image" content="https://marca-zero.evertonstedile.com.br/assets/og-image.jpg">
+<meta name="twitter:image" content="https://marcazero.evertonstedile.com.br/assets/og-image.jpg">
 <meta name="twitter:image:alt" content="Marca Zero — wordmark sobre faísca e raízes verdes do Método RAIZ">
 <meta name="theme-color" content="#04090A">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20fill='%2304090A'/%3E%3Cpath%20d='M40%206%20L24%2058'%20stroke='%2399AC62'%20stroke-width='5'%20stroke-linecap='round'/%3E%3C/svg%3E">
@@ -3123,7 +3123,17 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         var mLogo = document.querySelector('#metodo .metodo-logo');
         var fzMain = fz.querySelector('.fz-main');
         var fzBrs = fz.querySelectorAll('.fz-br');
+        var fzSvg = fz.querySelector('.fz-svg');
+        var focus = document.querySelector('#metodo .metodo-focus');
         var N = mfItems.length;
+        /* posição do nó i (na raiz fz-svg) relativa ao centro da camada de foco — o
+           número viaja pra cá no zoom-out e fica pequeno, preenchendo a raiz com os números. */
+        function nodeDelta(i, axis) {
+          var sr = fzSvg.getBoundingClientRect(), fr = focus.getBoundingClientRect();
+          var nx = sr.left + (100 + i * 200) / 1200 * sr.width;
+          var ny = sr.top + 34 / 118 * sr.height;
+          return axis === 'x' ? nx - (fr.left + fr.width / 2) : ny - (fr.top + fr.height / 2);
+        }
         fzFases.forEach(function (f) { f.classList.remove('rv'); });
         gsap.set(mfItems, { opacity: 0, scale: 0.7, y: 24 });
         var tl = gsap.timeline({
@@ -3140,10 +3150,15 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
           tl.to(mLogo, { filter: 'blur(6px)', opacity: 0.4, ease: 'none', duration: 0.1 }, t + 0.06);
           tl.fromTo(mf, { opacity: 0, scale: 0.7, y: 24 },
                        { opacity: 1, scale: 1, y: 0, ease: 'none', duration: 0.3, immediateRender: false }, t + 0.12);
-          if (i < N - 1) {
-            tl.to(mf, { opacity: 0, scale: 0.34, y: -12, ease: 'none', duration: 0.26 }, t + 0.66);
-            tl.to(mLogo, { filter: 'blur(0px)', opacity: 1, ease: 'none', duration: 0.1 }, t + 0.7);
-          }
+          /* zoom-out: o número VIAJA até seu nó na raiz e fica pequeno lá (a raiz se
+             preenche com os números, como no desktop); a logo volta nítida. */
+          tl.to([mf.querySelector('.mf-name'), mf.querySelector('p')], { opacity: 0, ease: 'none', duration: 0.12 }, t + 0.6);
+          tl.to(mf, {
+            x: function () { return nodeDelta(i, 'x'); },
+            y: function () { return nodeDelta(i, 'y'); },
+            scale: 0.17, ease: 'power1.in', duration: 0.3
+          }, t + 0.62);
+          tl.to(mLogo, { filter: 'blur(0px)', opacity: 1, ease: 'none', duration: 0.1 }, t + 0.66);
         });
         tl.to({}, { duration: 0.12 });
       });
@@ -3173,39 +3188,49 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
             scrollTrigger: { trigger: card, start: 'top 90%', end: 'top 56%', scrub: 0.5 } });
       });
 
-      /* CHECKOUT — o funil PANORAMIZA: a fileira de passos desliza na horizontal
-         conforme o scroll (revela cada card) enquanto eles ACENDEM um a um (.active). */
+      /* CHECKOUT — TRAVA o scroll no capítulo (pin) até os 6 passos do funil serem
+         REVELADOS e ACESOS (cor) um a um, panoramizando para acompanhar. Depois libera. */
       var coFlow = document.querySelector('#checkout .flow');
-      if (coFlow) {
+      var coSteps = gsap.utils.toArray('#checkout .flow-step');
+      if (coFlow && coSteps.length) {
+        coFlow.classList.remove('rv');
+        gsap.set(coSteps, { opacity: 0, y: 22 });
+        coSteps.forEach(function (s) { s.classList.remove('active'); });
         var coP = { x: 0 };
-        gsap.to(coP, { x: 1, ease: 'none',
-          scrollTrigger: { trigger: '#checkout .flow', start: 'top 80%', end: 'top 24%', scrub: 0.5 },
-          onUpdate: function () { coFlow.scrollLeft = coP.x * Math.max(0, coFlow.scrollWidth - coFlow.clientWidth); } });
+        var coTl = gsap.timeline({
+          scrollTrigger: { trigger: '#checkout', start: 'center center', end: '+=' + (coSteps.length * 42) + '%', scrub: 0.5, pin: true,
+            onUpdate: function (self) {
+              var lit = Math.round(self.progress * coSteps.length);
+              coSteps.forEach(function (s, i) { s.classList.toggle('active', i < lit); });
+            }
+          }
+        });
+        coSteps.forEach(function (s, i) {
+          coTl.to(s, { opacity: 1, y: 0, ease: 'none', duration: 0.8 }, i * 0.8);
+        });
+        coTl.to(coP, { x: 1, ease: 'none', duration: coSteps.length * 0.8,
+          onUpdate: function () { coFlow.scrollLeft = coP.x * Math.max(0, coFlow.scrollWidth - coFlow.clientWidth); } }, 0);
       }
 
-      /* TIKTOK — o carrossel GANHA VIDA: as molduras entram em cascata da direita
-         e depois ANDAM SOZINHAS (vai-e-volta suave); o toque pausa e o swipe assume. */
+      /* TIKTOK — TRAVA o scroll no capítulo (pin) até as 3 molduras serem reveladas uma
+         a uma e o carrossel deslizar mostrando todas. Depois libera. (igual ao cap 8) */
       var ttPhones = gsap.utils.toArray('#tiktok .phone');
       var ttVp = document.querySelector('#tiktok .phones-vp');
       if (ttPhones.length && ttVp) {
         ttVp.classList.remove('rv');
-        gsap.set(ttPhones, { opacity: 0, x: 40, scale: 0.9 });
-        ScrollTrigger.create({
-          trigger: ttVp, start: 'top 84%', once: true,
-          onEnter: function () {
-            gsap.to(ttPhones, { opacity: 1, x: 0, scale: 1, duration: 0.6, stagger: 0.08, ease: mzEase });
-          }
-        });
-        /* o trilho DESLIZA conforme o scroll da página (de acordo com o scroll, igual
-           ao espírito do drift do desktop) — via ScrollTrigger scrub, que é o que
-           funciona neste site (tweens de auto-play/ticker não avançam aqui). */
         var ttTrack = ttVp.querySelector('.phones');
+        gsap.set(ttPhones, { opacity: 0, x: 44, scale: 0.9 });
+        var ttTl = gsap.timeline({
+          scrollTrigger: { trigger: '#tiktok', start: 'center center', end: '+=' + (ttPhones.length * 50) + '%', scrub: 0.5, pin: true }
+        });
+        ttPhones.forEach(function (ph, i) {
+          ttTl.to(ph, { opacity: 1, x: 0, scale: 1, ease: 'none', duration: 0.7 }, i * 0.8);
+        });
         if (ttTrack) {
-          gsap.fromTo(ttTrack, { x: 0 }, {
+          ttTl.fromTo(ttTrack, { x: 0 }, {
             x: function () { return Math.min(0, ttVp.clientWidth - ttTrack.scrollWidth); },
-            ease: 'none', immediateRender: false,
-            scrollTrigger: { trigger: '#tiktok', start: 'top 80%', end: 'bottom top', scrub: 0.6 }
-          });
+            ease: 'none', duration: ttPhones.length * 0.8
+          }, 0);
         }
       }
 
