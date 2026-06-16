@@ -1677,12 +1677,12 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
             <path class="fz-br" pathLength="1000" d="M900 30 C 894 56, 890 76, 884 102"/>
             <path class="fz-br" pathLength="1000" d="M1100 36 C 1106 58, 1110 78, 1116 104"/>
             <!-- raízes longas descendentes (só mobile, preenchem o vazio abaixo) -->
-            <path class="fz-root" pathLength="1000" d="M100 104 C 92 320, 110 760, 100 1160"/>
-            <path class="fz-root" pathLength="1000" d="M300 106 C 312 340, 290 780, 304 1160"/>
-            <path class="fz-root" pathLength="1000" d="M500 104 C 490 320, 512 760, 497 1160"/>
-            <path class="fz-root" pathLength="1000" d="M700 106 C 714 340, 688 790, 703 1160"/>
-            <path class="fz-root" pathLength="1000" d="M900 102 C 890 320, 912 760, 896 1160"/>
-            <path class="fz-root" pathLength="1000" d="M1100 104 C 1112 340, 1088 780, 1103 1160"/>
+            <path class="fz-root" pathLength="1000" d="M82 104 C 56 280, 108 460, 78 660 C 52 860, 100 1060, 80 1400"/>
+            <path class="fz-root" pathLength="1000" d="M318 106 C 344 280, 292 460, 322 660 C 346 860, 296 1060, 320 1400"/>
+            <path class="fz-root" pathLength="1000" d="M484 104 C 458 290, 510 470, 480 670 C 456 870, 506 1070, 484 1400"/>
+            <path class="fz-root" pathLength="1000" d="M720 106 C 746 290, 694 470, 724 670 C 748 870, 698 1070, 722 1400"/>
+            <path class="fz-root" pathLength="1000" d="M884 102 C 858 290, 910 470, 880 670 C 856 870, 906 1070, 884 1400"/>
+            <path class="fz-root" pathLength="1000" d="M1116 104 C 1142 290, 1090 470, 1120 670 C 1144 870, 1094 1070, 1118 1400"/>
           </svg>
           <div class="fases-grid">
             <div class="fase rv"><h3><i>Fase 1</i>Terreno</h3><p>Onde plantar: o mercado é lido antes de qualquer produto.</p></div>
@@ -2911,10 +2911,11 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
           .fromTo(toInt, { x: function () { return  toOff(); }, opacity: 0 }, { x: 0, opacity: 1, ease: 'none' }, 0);
     }
 
-    /* CHECKOUT — A5: os 6 passos do funil acendem um a um conforme o scroll.
-       O usuário percorre o funil — a seção ensina o conteúdo. */
-    var coSteps = gsap.utils.toArray('#checkout .flow-step');
-    if (coSteps.length) {
+    /* CHECKOUT — A5 (DESKTOP só): os 6 passos acendem um a um. No mobile, a esteira da
+       cerimônia em touch cuida do fill — senão os dois conflitam no início da seção. */
+    gsap.matchMedia().add('(min-width: 1021px)', function () {
+      var coSteps = gsap.utils.toArray('#checkout .flow-step');
+      if (!coSteps.length) return;
       ScrollTrigger.create({
         trigger: '#checkout .flow', start: 'top 80%', end: 'top 34%',
         onUpdate: function (self) {
@@ -2924,7 +2925,7 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         onLeave:     function () { coSteps.forEach(function (s) { s.classList.add('active'); }); },
         onLeaveBack: function () { coSteps.forEach(function (s) { s.classList.remove('active'); }); }
       });
-    }
+    });
 
     /* IDENTIDADE — A3: as duas logos entram por cortina (máscara overflow:clip +
        img transladando de baixo); depois os 4 checks acendem em sequência. */
@@ -3236,16 +3237,17 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
         coSteps.forEach(function (s) { s.classList.remove('active'); });
         var coN = coSteps.length;
         var coCx = function (i) { var s = coSteps[i]; return Math.round(coFlow.clientWidth / 2 - (s.offsetLeft + s.offsetWidth / 2)); };
-        gsap.set(coFlow, { x: function () { return coCx(0); } });
-        var coTl = gsap.timeline({
-          scrollTrigger: { trigger: '#checkout', start: 'center center', end: '+=' + (coN * 50) + '%', scrub: 0.5, pin: true,
-            onUpdate: function (self) {
-              var lit = Math.min(coN, Math.floor(self.progress * (coN - 1) + 0.5) + 1);
-              coSteps.forEach(function (s, i) { s.classList.toggle('active', i < lit); });
-            }
+        gsap.set(coFlow, { x: coCx(0) });
+        ScrollTrigger.create({
+          trigger: '#checkout', start: 'center center', end: '+=' + (coN * 50) + '%', scrub: 0.5, pin: true,
+          onRefresh: function () { gsap.set(coFlow, { x: coCx(0) }); },
+          onUpdate: function (self) {
+            var a = coCx(0), b = coCx(coN - 1);
+            gsap.set(coFlow, { x: a + (b - a) * self.progress });
+            var lit = Math.min(coN, Math.floor(self.progress * (coN - 1) + 0.5) + 1);
+            coSteps.forEach(function (s, i) { s.classList.toggle('active', i < lit); });
           }
         });
-        coTl.to(coFlow, { x: function () { return coCx(coN - 1); }, ease: 'none', duration: 1 }, 0);
       }
 
       /* TIKTOK — TRAVA o scroll (pin); ESTEIRA igual ao cap 8: as molduras entram da
