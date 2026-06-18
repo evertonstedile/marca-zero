@@ -2970,9 +2970,10 @@ html.gsap .f-cta.is-lit{ opacity:1; transform:none; pointer-events:auto }
       if (!stage || !track) return;
       var dist = function () {
         var last = track.querySelector('.arc-item:last-child');
-        // para o NÓ do último marco (2026) a ~46% da viewport — fica no MEIO, com
-        // respiro p/ o texto à direita; só então o pin solta o scroll vertical.
-        if (last) return Math.max(0, last.offsetLeft - window.innerWidth * 0.46);
+        // CENTRALIZA o último marco (2026) INTEIRO na viewport — nó + texto no meio,
+        // com folga dos dois lados, sem cortar nada; só então o pin solta o scroll.
+        // (offsetLeft/offsetWidth são imunes ao transform do scrub → cálculo estável.)
+        if (last) return Math.max(0, last.offsetLeft + last.offsetWidth / 2 - window.innerWidth / 2);
         return Math.max(0, track.scrollWidth - window.innerWidth);
       };
       gsap.set(track, { x: 0 });
@@ -3498,7 +3499,7 @@ html.gsap .f-cta.is-lit{ opacity:1; transform:none; pointer-events:auto }
       + '<span class="mz-bridge-txt"><span class="bt-a">Até aqui, o Método.</span><span class="bt-b">Agora, a jornada de vocês.</span></span>';
     document.body.appendChild(el);
     requestAnimationFrame(function () { el.classList.add('go'); });
-    setTimeout(function () { location.href = href; }, 1500);
+    setTimeout(function () { location.href = href; }, 3500);   // segura mais — dá tempo de LER a frase da transição
   }
 
   /* pop-up cinematográfico de entrada na jornada */
