@@ -1368,6 +1368,51 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
   font-size:.74rem; color:rgba(239,239,229,.45); letter-spacing:.06em;
 }
 
+/* ════ FLUXO "A RAIZ CONTÍNUA" — saída cerimonial site → jornada ════ */
+.f-cta{
+  position:relative; z-index:3; margin-top:clamp(20px,3.4vh,40px);
+  display:inline-flex; flex-direction:column; align-items:center; gap:10px;
+  text-decoration:none; text-align:center;
+}
+.f-cta-k{
+  font-family:var(--font-display); font-weight:300; font-size:.62rem;
+  letter-spacing:.32em; text-transform:uppercase; color:var(--faint);
+}
+.f-cta-k .sl{ color:var(--mz-green); margin-right:.35em }
+.f-cta-b{
+  display:inline-flex; align-items:center; gap:.7em;
+  padding:.72em 1.5em; border:1px solid color-mix(in srgb,var(--mz-green) 55%, transparent);
+  border-radius:999px; background:rgba(4,9,10,.5);
+  font-family:var(--font-display); font-weight:300; font-size:1rem;
+  letter-spacing:.02em; color:var(--mz-green-light);
+  transition:border-color .4s var(--ease), box-shadow .4s var(--ease), background .4s var(--ease);
+}
+.f-cta:hover .f-cta-b, .f-cta:focus-visible .f-cta-b{
+  border-color:var(--mz-green-light);
+  box-shadow:0 0 34px 2px color-mix(in srgb,var(--mz-green) 30%, transparent);
+  background:rgba(4,9,10,.66);
+}
+.f-cta-go{ transition:transform .4s var(--ease) }
+.f-cta:hover .f-cta-go{ transform:translateX(4px) }
+/* travado até o fim do scrub (só no caminho GSAP; fallback sem-gsap = aceso) */
+html.gsap .f-cta{ opacity:0; transform:translateY(16px); pointer-events:none;
+  transition:opacity .8s var(--ease), transform .8s var(--ease); }
+html.gsap .f-cta.is-lit{ opacity:1; transform:none; pointer-events:auto }
+
+/* tela-ponte do salto cross-domain (réplica fiel da jornada) */
+.mz-bridge{ position:fixed; inset:0; z-index:200; background:var(--mz-black);
+  display:grid; place-content:center; gap:26px; opacity:0; transition:opacity .45s var(--ease); }
+.mz-bridge.go{ opacity:1; }
+.mz-bridge-bar{ width:3px; height:min(46vh,400px); justify-self:center; border-radius:3px;
+  background:linear-gradient(180deg, var(--mz-green-light), var(--mz-green-deep));
+  box-shadow:0 0 30px 2px color-mix(in srgb,var(--mz-green-light) 55%, transparent);
+  transform:rotate(20deg) scaleY(0); transform-origin:top center; transition:transform .9s var(--ease) .12s; }
+.mz-bridge.go .mz-bridge-bar{ transform:rotate(20deg) scaleY(1); }
+.mz-bridge-txt{ display:flex; flex-direction:column; gap:7px; text-align:center; opacity:0; transition:opacity .6s var(--ease) .5s; }
+.mz-bridge.go .mz-bridge-txt{ opacity:1; }
+.mz-bridge-txt .bt-a{ font-family:var(--font-display); font-weight:300; letter-spacing:.18em; text-transform:uppercase; font-size:.82rem; color:var(--faint); }
+.mz-bridge-txt .bt-b{ font-family:var(--font-display); font-weight:300; letter-spacing:.02em; font-size:1.15rem; color:var(--mz-green-light); }
+
 /* ============================================================
    RESPONSIVO
    ============================================================ */
@@ -2243,6 +2288,10 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
             <img src="assets/logo-metodo-raiz.webp" alt="Método RAIZ" decoding="async">
           </div>
           <p class="f-line">Marca Zero · Método RAIZ — mentoria individual conduzida por Everton Stedile · 2026</p>
+          <a class="f-cta" id="ctaJornada" href="https://mentorados.evertonstedile.com.br/?from=site">
+            <span class="f-cta-k"><span class="sl">/</span> a sua jornada começa aqui</span>
+            <span class="f-cta-b">Entrar na jornada <span class="f-cta-go" aria-hidden="true">→</span></span>
+          </a>
         </div>
       </div>
     </footer>
@@ -3296,8 +3345,10 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
     if (fTrack && footVid) {
       var bindFoot = function () {
         var fdur = Math.max(0.01, footVid.duration - 0.05);
+        var fCta = document.getElementById('ctaJornada');
         var fTl = gsap.timeline({
-          scrollTrigger: { trigger: '#fTrack', start: 'top top', end: 'bottom bottom', scrub: 0.5 }
+          scrollTrigger: { trigger: '#fTrack', start: 'top top', end: 'bottom bottom', scrub: 0.5,
+            onUpdate: function (self) { if (fCta) fCta.classList.toggle('is-lit', self.progress > 0.8); } }
         });
         fTl.fromTo(footVid, { currentTime: 0 }, { currentTime: fdur, ease: 'none', duration: 1 }, 0)
            .fromTo('.f-logo',
@@ -3357,6 +3408,57 @@ html.gsap .f-stage{ position:sticky; top:0; height:100vh; min-height:0 }
       document.fonts.ready.then(function () { ScrollTrigger.refresh(); buildRailNodes(); });
     }
     addEventListener('load', function () { ScrollTrigger.refresh(); buildRailNodes(); });
+  }
+})();
+</script>
+
+<script>
+/* FLUXO "A RAIZ CONTÍNUA" — Ato 1 → Ato 2 (site → jornada deles), cross-domain */
+(function () {
+  var REDUCE = false;
+  try { REDUCE = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+
+  /* veio da portaria da jornada (?r=raiz): limpa a URL, preserva hash/contexto */
+  try {
+    var qs = new URLSearchParams(location.search);
+    if (qs.get('r') === 'raiz' && history.replaceState) {
+      qs.delete('r');
+      history.replaceState(null, '', location.pathname + (qs.toString() ? '?' + qs : '') + location.hash);
+    }
+  } catch (e) {}
+
+  /* tela-ponte: fade pro preto + barra "/" + frase de virada → salta pra jornada */
+  function bridge(href) {
+    if (REDUCE) { location.href = href; return; }
+    var el = document.createElement('div');
+    el.className = 'mz-bridge';
+    el.innerHTML = '<span class="mz-bridge-bar" aria-hidden="true"></span>'
+      + '<span class="mz-bridge-txt"><span class="bt-a">Até aqui, o Método.</span><span class="bt-b">Agora, a jornada de vocês.</span></span>';
+    document.body.appendChild(el);
+    requestAnimationFrame(function () { el.classList.add('go'); });
+    setTimeout(function () { location.href = href; }, 1500);
+  }
+
+  var cta = document.getElementById('ctaJornada');
+  if (cta) {
+    /* salto pela tela-ponte */
+    cta.addEventListener('click', function (e) {
+      e.preventDefault();
+      bridge(cta.getAttribute('href'));
+    });
+    /* fallback: garante que o CTA acende no fim do scroll mesmo se o vídeo do
+       footer não carregar (mobile/rede ruim). O scrub do GSAP é o caminho
+       premium; este é o cinto de segurança. */
+    var lightUp = function () {
+      if ((window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 8)) {
+        cta.classList.add('is-lit');
+        window.removeEventListener('scroll', lightUp);
+        window.removeEventListener('resize', lightUp);
+      }
+    };
+    window.addEventListener('scroll', lightUp, { passive: true });
+    window.addEventListener('resize', lightUp, { passive: true });
+    lightUp();
   }
 })();
 </script>
