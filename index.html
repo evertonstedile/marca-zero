@@ -122,7 +122,7 @@ em{ font-style:normal }
   font-size:.82rem; letter-spacing:.34em;
 }
 .ch-mark .sl{ color:inherit; opacity:.65 }
-.ch-mark img{ height:18px; width:auto; display:block; }
+.ch-mark img{ height:clamp(26px,2vw,32px); width:auto; display:block; }
 .ch-counter{
   font-family:var(--font-display); font-weight:300;
   font-size:.74rem; letter-spacing:.3em;
@@ -1412,6 +1412,50 @@ html.gsap .f-cta.is-lit{ opacity:1; transform:none; pointer-events:auto }
 .mz-bridge.go .mz-bridge-txt{ opacity:1; }
 .mz-bridge-txt .bt-a{ font-family:var(--font-display); font-weight:300; letter-spacing:.18em; text-transform:uppercase; font-size:.82rem; color:var(--faint); }
 .mz-bridge-txt .bt-b{ font-family:var(--font-display); font-weight:300; letter-spacing:.02em; font-size:1.15rem; color:var(--mz-green-light); }
+
+/* ════ POP-UP CINEMATOGRÁFICO — "Entrar na jornada" (fim do scroll) ════ */
+.mz-pop{ position:fixed; inset:0; z-index:240; display:grid; place-items:center;
+  opacity:0; visibility:hidden; transition:opacity .6s var(--ease), visibility 0s linear .6s; }
+.mz-pop.open{ opacity:1; visibility:visible; transition:opacity .7s var(--ease); }
+.mz-pop-veil{ position:absolute; inset:0; background:rgba(2,5,6,.82);
+  backdrop-filter:blur(9px) saturate(.9); -webkit-backdrop-filter:blur(9px) saturate(.9); }
+.mz-pop-card{ position:relative; text-align:center; max-width:min(680px,92vw);
+  padding:clamp(34px,6vw,72px) clamp(26px,5vw,64px);
+  transform:translateY(30px) scale(.96); opacity:0;
+  transition:transform .85s var(--ease) .08s, opacity .85s var(--ease) .08s; }
+.mz-pop.open .mz-pop-card{ transform:none; opacity:1; }
+.mz-pop-bar{ display:block; width:3px; height:clamp(60px,12vh,116px); margin:0 auto clamp(20px,3vh,32px);
+  border-radius:3px; background:linear-gradient(180deg,var(--mz-green-light),var(--mz-green-deep));
+  box-shadow:0 0 36px 3px color-mix(in srgb,var(--mz-green-light) 50%, transparent);
+  transform:rotate(20deg) scaleY(0); transform-origin:top center; transition:transform 1s var(--ease) .28s; }
+.mz-pop.open .mz-pop-bar{ transform:rotate(20deg) scaleY(1); }
+.mz-pop-k{ font-family:var(--font-display); font-weight:300; font-size:clamp(.64rem,1.4vw,.78rem);
+  letter-spacing:.34em; text-transform:uppercase; color:var(--faint); }
+.mz-pop-k .sl{ color:var(--mz-green); margin-right:.4em }
+.mz-pop-t{ font-family:var(--font-display); font-weight:200; margin:clamp(13px,2vh,20px) 0 0;
+  font-size:clamp(2.1rem,6vw,3.9rem); line-height:1.03; letter-spacing:-.01em;
+  background:linear-gradient(180deg,var(--mz-cream),var(--mz-green-light));
+  -webkit-background-clip:text; background-clip:text; color:transparent; }
+.mz-pop-d{ margin:clamp(15px,2.4vh,24px) auto 0; max-width:44ch; color:rgba(239,239,229,.74);
+  font-size:clamp(1rem,1.6vw,1.16rem); line-height:1.55; }
+.mz-pop-btn{ display:inline-flex; align-items:center; gap:.7em; margin-top:clamp(26px,4vh,42px);
+  padding:1.05em 2.4em; border-radius:999px; text-decoration:none;
+  font-family:var(--font-display); font-weight:400; font-size:clamp(1.05rem,1.8vw,1.28rem); letter-spacing:.02em;
+  color:var(--mz-black); background:linear-gradient(180deg,var(--mz-green-light),var(--mz-green));
+  box-shadow:0 18px 50px -12px color-mix(in srgb,var(--mz-green) 60%, transparent);
+  transition:transform .4s var(--ease), box-shadow .4s var(--ease); }
+.mz-pop-btn:hover, .mz-pop-btn:focus-visible{ transform:translateY(-2px);
+  box-shadow:0 0 46px 4px color-mix(in srgb,var(--mz-green-light) 45%, transparent), 0 24px 62px -10px color-mix(in srgb,var(--mz-green) 70%, transparent); }
+.mz-pop-go{ transition:transform .4s var(--ease) }
+.mz-pop-btn:hover .mz-pop-go{ transform:translateX(5px) }
+.mz-pop-dismiss{ display:block; margin:clamp(16px,2.4vh,24px) auto 0; background:none; border:0; cursor:pointer;
+  font-family:var(--font-display); font-weight:300; font-size:.78rem; letter-spacing:.14em;
+  color:rgba(239,239,229,.45); transition:color .3s var(--ease); }
+.mz-pop-dismiss:hover, .mz-pop-dismiss:focus-visible{ color:var(--mz-green-light) }
+@media (prefers-reduced-motion:reduce){
+  .mz-pop, .mz-pop-card, .mz-pop-bar{ transition-duration:.001s !important }
+  .mz-pop-bar{ transform:rotate(20deg) scaleY(1) }
+}
 
 /* ============================================================
    RESPONSIVO
@@ -2924,7 +2968,13 @@ html.gsap .f-cta.is-lit{ opacity:1; transform:none; pointer-events:auto }
       var track = stage && stage.querySelector('.arc');
       var fill  = stage && stage.querySelector('.arc-fill');
       if (!stage || !track) return;
-      var dist = function () { return Math.max(0, track.scrollWidth - window.innerWidth + window.innerWidth * 0.02); };
+      var dist = function () {
+        var last = track.querySelector('.arc-item:last-child');
+        // para o NÓ do último marco (2026) a ~46% da viewport — fica no MEIO, com
+        // respiro p/ o texto à direita; só então o pin solta o scroll vertical.
+        if (last) return Math.max(0, last.offsetLeft - window.innerWidth * 0.46);
+        return Math.max(0, track.scrollWidth - window.innerWidth);
+      };
       gsap.set(track, { x: 0 });
       var tl = gsap.timeline({
         scrollTrigger: {
@@ -3412,6 +3462,18 @@ html.gsap .f-cta.is-lit{ opacity:1; transform:none; pointer-events:auto }
 })();
 </script>
 
+<div class="mz-pop" id="joinPop" role="dialog" aria-modal="true" aria-label="Entrar na jornada" aria-hidden="true">
+  <div class="mz-pop-veil" data-pop-close></div>
+  <div class="mz-pop-card" role="document">
+    <span class="mz-pop-bar" aria-hidden="true"></span>
+    <p class="mz-pop-k"><span class="sl">/</span> a sua jornada começa aqui</p>
+    <h2 class="mz-pop-t">Pronto para<br>plantar a sua?</h2>
+    <p class="mz-pop-d">O Método você já viu. Agora é a jornada de vocês — sessão a sessão, do solo ao fruto.</p>
+    <a class="mz-pop-btn" id="popJoinBtn" href="https://mentorados.evertonstedile.com.br/?from=site">Entrar na jornada <span class="mz-pop-go" aria-hidden="true">→</span></a>
+    <button class="mz-pop-dismiss" type="button" data-pop-close>voltar à página</button>
+  </div>
+</div>
+
 <script>
 /* FLUXO "A RAIZ CONTÍNUA" — Ato 1 → Ato 2 (site → jornada deles), cross-domain */
 (function () {
@@ -3439,19 +3501,33 @@ html.gsap .f-cta.is-lit{ opacity:1; transform:none; pointer-events:auto }
     setTimeout(function () { location.href = href; }, 1500);
   }
 
+  /* pop-up cinematográfico de entrada na jornada */
+  var pop = document.getElementById('joinPop');
+  var popAuto = false, popDismissed = false;
+  function openPop() {
+    if (!pop || pop.classList.contains('open')) return;
+    pop.classList.add('open'); pop.setAttribute('aria-hidden', 'false');
+  }
+  function closePop() {
+    if (!pop) return;
+    pop.classList.remove('open'); pop.setAttribute('aria-hidden', 'true'); popDismissed = true;
+  }
+  if (pop) {
+    pop.querySelectorAll('[data-pop-close]').forEach(function (el) { el.addEventListener('click', closePop); });
+    var joinBtn = document.getElementById('popJoinBtn');
+    if (joinBtn) joinBtn.addEventListener('click', function (e) { e.preventDefault(); bridge(joinBtn.getAttribute('href')); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && pop.classList.contains('open')) closePop(); });
+  }
+
+  /* o CTA pequeno sob a logo acende no fim do scroll e ABRE o pop;
+     o pop também abre sozinho 1x ao chegar no fim absoluto da página. */
   var cta = document.getElementById('ctaJornada');
   if (cta) {
-    /* salto pela tela-ponte */
-    cta.addEventListener('click', function (e) {
-      e.preventDefault();
-      bridge(cta.getAttribute('href'));
-    });
-    /* fallback: garante que o CTA acende no fim do scroll mesmo se o vídeo do
-       footer não carregar (mobile/rede ruim). O scrub do GSAP é o caminho
-       premium; este é o cinto de segurança. */
+    cta.addEventListener('click', function (e) { e.preventDefault(); openPop(); });
     var lightUp = function () {
       if ((window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 8)) {
         cta.classList.add('is-lit');
+        if (!popAuto && !popDismissed) { popAuto = true; openPop(); }
         window.removeEventListener('scroll', lightUp);
         window.removeEventListener('resize', lightUp);
       }
